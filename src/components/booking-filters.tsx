@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import DateFilter from "./date-filter"
+import DateFilterWithSuspense from "./date-filter"
 
 export function BookingFilters() {
     const [checkIn, setCheckIn] = useState("22-10-2025")
@@ -18,7 +19,7 @@ export function BookingFilters() {
     return (
         <div className="sticky top-[52px] z-40 bg-[#dedede] py-8 px-6  w-full shadow-lg">
             <div className=" w-full grid grid-cols-12 gap-4 max-w-[1000px] mx-auto">
-                <DateFilter />
+                <DateFilterWithSuspense />
                 <div className=" col-span-2">
                     <Label className="text-[#008ace] font-[300] text-[10px] leading-[18px] uppercase mb-[2px]">ROOM</Label>
                     <Popover>

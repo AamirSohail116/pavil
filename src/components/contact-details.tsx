@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 
 interface ContactDetailsProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     form: UseFormReturn<any>
 }
 

@@ -9,6 +9,7 @@ import { FormControl, FormField, FormItem, FormMessage } from "@/components/ui/f
 
 interface GuestDetailsSectionProps {
     roomNumber: number
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     form: UseFormReturn<any>
     roomIndex: number
     showUseForAllRooms?: boolean

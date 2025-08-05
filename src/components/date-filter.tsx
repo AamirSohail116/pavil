@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { format, subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { ChevronDown } from "lucide-react";
@@ -113,4 +113,28 @@ const DateFilter = () => {
     );
 };
 
-export default DateFilter;
+
+export default function DateFilterWithSuspense() {
+    return (
+        <Suspense fallback={
+            <div className="col-span-6 w-full">
+                <div className="flex items-center justify-between px-4 mb-1">
+                    <span className="text-[#008ace] font-[300] text-[10px] leading-[18px] uppercase">
+                        check in
+                    </span>
+                    <span className="text-[#008ace] font-[300] text-[10px] leading-[18px] uppercase">
+                        check out
+                    </span>
+                </div>
+                <Button
+                    variant="outline"
+                    className="w-full border border-[#008ace] rounded-none text-[#008ace] hover:text-[#008ace] cursor-pointer"
+                >
+                    Loading dates...
+                </Button>
+            </div>
+        }>
+            <DateFilter />
+        </Suspense>
+    );
+}

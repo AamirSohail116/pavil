@@ -10,6 +10,7 @@ import { BsPersonStanding } from "react-icons/bs";
 import Link from "next/link"
 
 interface BookingSummaryProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     form: UseFormReturn<any>
 }
 
