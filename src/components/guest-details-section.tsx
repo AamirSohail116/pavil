@@ -1,30 +1,33 @@
-"use client"
+// components/guest-details-section.tsx
 
-import type { UseFormReturn } from "react-hook-form"
+"use client";
+import { UseFormReturn } from "react-hook-form"
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Label } from "./ui/label";
 
 interface GuestDetailsSectionProps {
-    roomNumber: number
+    roomNumber: number;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    form: UseFormReturn<any>
-    roomIndex: number
-    showUseForAllRooms?: boolean
-    onUseDetailsForAllRooms?: (checked: boolean, roomIndex: number) => void
-    useDetailsForAllRooms?: boolean
+    form: UseFormReturn<any>;
+    roomIndex: number;
+    roomId: string;
+    showUseForAllRooms: boolean;
+    onUseDetailsForAllRooms: (checked: boolean, roomIndex: number) => void;
+    useDetailsForAllRooms: boolean;
 }
-
 export function GuestDetailsSection({
     roomNumber,
     form,
     roomIndex,
-    showUseForAllRooms = false,
+    roomId,
+    showUseForAllRooms,
     onUseDetailsForAllRooms,
-    useDetailsForAllRooms = false,
+    useDetailsForAllRooms
 }: GuestDetailsSectionProps) {
+
     return (
         <div className="space-y-4">
             <h3 className="text-lg font-[500]">{`Guest Details for Room ${roomNumber}`}</h3>

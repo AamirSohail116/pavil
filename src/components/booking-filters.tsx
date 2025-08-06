@@ -5,19 +5,63 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import DateFilter from "./date-filter"
 import DateFilterWithSuspense from "./date-filter"
+import { Plus, Minus } from 'lucide-react';
+import LanguageCurrencyMenu from "./language-currency-menu"
+
+interface Room {
+    id: number;
+    guests: number;
+}
 
 export function BookingFilters() {
     const [checkIn, setCheckIn] = useState("22-10-2025")
     const [checkOut, setCheckOut] = useState("21-11-2025")
-    const [rooms, setRooms] = useState("1")
-    const [guests, setGuests] = useState("2")
     const [promoCode, setPromoCode] = useState("")
 
+    const [rooms, setRooms] = useState<Room[]>([
+        { id: 1, guests: 4 },
+        { id: 2, guests: 2 }
+    ]);
+
+    const addRoom = (): void => {
+        const newRoom: Room = {
+            id: Math.max(...rooms.map((r: Room) => r.id)) + 1,
+            guests: 1
+        };
+        setRooms([...rooms, newRoom]);
+    };
+
+    const removeRoom = (roomId: number): void => {
+        if (rooms.length > 1) {
+            setRooms(rooms.filter((room: Room) => room.id !== roomId));
+        }
+    };
+
+    const updateGuests = (roomId: number, change: number): void => {
+        setRooms(
+            rooms.map((room: Room) => {
+                if (room.id === roomId) {
+                    const newGuests: number = room.guests + change;
+                    return {
+                        ...room,
+                        guests: Math.max(1, Math.min(4, newGuests))
+                    };
+                }
+                return room;
+            })
+        );
+    };
+
+    const totalGuests: number = rooms.reduce((sum: number, room: Room) => sum + room.guests, 0);
+
+
+
+
+
     return (
-        <div className="sticky top-[52px] z-40 bg-[#dedede] py-8 px-6  w-full shadow-lg">
+        <div className="sticky top-[52px] z-40 bg-[#dedede] pb-8 px-6 pt-2  w-full shadow-lg">
+            <LanguageCurrencyMenu />
             <div className=" w-full grid grid-cols-12 gap-4 max-w-[1000px] mx-auto">
                 <DateFilterWithSuspense />
                 <div className=" col-span-2">
@@ -28,40 +72,81 @@ export function BookingFilters() {
                                 variant="outline"
                                 className="w-full justify-start border border-[#008ace] h-[34px] rounded-none  text-[#008ace] font-[400] text-[14px] "
                             >
-                                {rooms} Room, {guests} Guest
+                                {rooms.length} Room{rooms.length > 1 ? 's' : ''}, {totalGuests} Guest{totalGuests > 1 ? 's' : ''}
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-80">
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="rooms">Rooms</Label>
-                                    <Select value={rooms} onValueChange={setRooms}>
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="1">1 Room</SelectItem>
-                                            <SelectItem value="2">2 Rooms</SelectItem>
-                                            <SelectItem value="3">3 Rooms</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="guests">Guests</Label>
-                                    <Select value={guests} onValueChange={setGuests}>
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="1">1 Guest</SelectItem>
-                                            <SelectItem value="2">2 Guests</SelectItem>
-                                            <SelectItem value="3">3 Guests</SelectItem>
-                                            <SelectItem value="4">4 Guests</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                        <PopoverContent className="w-[200px] p-0">
+                            <div className="space-y-2">
+                                {rooms.map((room, index) => {
+                                    const isFirst = index === 0;
+                                    const isLast = index === rooms.length - 1;
+
+                                    return (
+                                        <div
+                                            key={index}
+                                            className=""
+                                        >
+                                            {/* Room Header */}
+                                            <div className="flex justify-between bg-[#dedede] items-center mb-2 px-2">
+                                                <span className="font-[400] text-[12px] leading-normal">Room {index + 1}</span>
+                                                <div className="flex items-center gap-1">
+                                                    {/* Minus icon: show if more than 1 room and NOT first-only room */}
+                                                    {(rooms.length > 1 || !isFirst) && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => removeRoom(room.id)}
+                                                            className="w-6 h-6 p-0 text-[#484747] border-none cursor-pointer"
+                                                        >
+                                                            <Minus size={14} />
+                                                        </Button>
+                                                    )}
+                                                    {/* Plus icon: only for last room */}
+                                                    {isLast && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={addRoom}
+                                                            className="w-6 h-6 p-0 text-[#484747] border-none cursor-pointer"
+                                                        >
+                                                            <Plus size={14} />
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Guests Controller */}
+                                            <div className=" px-3 ">
+                                                <div className="font-[400] text-[12px] leading-normal">Guest</div>
+                                                <div className="flex items-center border border-[#ddd] mb-2">
+                                                    <Button
+                                                        size="icon"
+                                                        variant="outline"
+                                                        className="  flex-1 bg-[#eee] rounded-none"
+                                                        onClick={() => updateGuests(room.id, -1)}
+                                                        disabled={room.guests === 1}
+                                                    >
+                                                        <Minus size={14} />
+                                                    </Button>
+                                                    <span className=" flex-1 text-center text-[12px] font-normal">{room.guests}</span>
+                                                    <Button
+                                                        size="icon"
+                                                        variant="outline"
+                                                        className="  flex-1 bg-[#eee] rounded-none"
+                                                        onClick={() => updateGuests(room.id, 1)}
+                                                        disabled={room.guests === 4}
+                                                    >
+                                                        <Plus size={14} />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </PopoverContent>
+
+
                     </Popover>
                 </div>
 

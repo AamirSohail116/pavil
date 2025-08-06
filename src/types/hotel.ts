@@ -16,6 +16,7 @@ export interface Room {
     type: string;
     size: number;
     maxGuests: number;
+    numberOfRooms: number;
     price: number;
     originalPrice?: number;
     discount?: number;

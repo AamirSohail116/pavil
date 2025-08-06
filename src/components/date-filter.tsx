@@ -3,7 +3,6 @@
 import { Suspense, useState } from "react";
 import { format, subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
-import { ChevronDown } from "lucide-react";
 import qs from "query-string";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -14,7 +13,6 @@ import {
     Popover,
     PopoverContent,
     PopoverTrigger,
-    PopoverClose,
 } from "./ui/popover";
 
 const DateFilter = () => {
