@@ -14,6 +14,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "./ui/popover";
+import BookingLegend from "./booking-legend";
 
 const DateFilter = () => {
     const pathname = usePathname();
@@ -77,34 +78,15 @@ const DateFilter = () => {
                 </PopoverTrigger>
                 <PopoverContent className=" lg:w-auto w-full p-0 " align="start">
                     <Calendar
-                        disabled={false}
+                        disabled={{ before: new Date() }}
                         mode="range"
                         defaultMonth={date?.from}
                         selected={date}
                         onSelect={setDate}
                         numberOfMonths={2}
                     />
-                    {/* <div className=" p-4 w-full flex items-center gap-x-2">
-                        <PopoverClose asChild>
-                            <Button
-                                onClick={onReset}
-                                disabled={!date?.from || !date?.to}
-                                className=" w-full"
-                                variant="outline"
-                            >
-                                Reset
-                            </Button>
-                        </PopoverClose>
-                        <PopoverClose asChild>
-                            <Button
-                                onClick={() => pushToUrl(date)}
-                                disabled={!date?.from || !date?.to}
-                                className=" w-full"
-                            >
-                                Appy
-                            </Button>
-                        </PopoverClose>
-                    </div> */}
+                    <BookingLegend />
+
                 </PopoverContent>
             </Popover>
         </div>

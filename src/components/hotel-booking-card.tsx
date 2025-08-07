@@ -1,14 +1,15 @@
 // components/hotel-booking-card.tsx (updated)
 "use client";
 
+import * as React from "react"
 import { useState } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { GoArrowUpRight } from "react-icons/go";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Link from "next/link"
+import { FaRegCopy } from "react-icons/fa6";
 import { BsPersonStanding } from "react-icons/bs";
-import * as React from "react"
 import {
     Carousel,
     CarouselContent,
@@ -19,6 +20,7 @@ import {
 import { RoomDetailsSheet } from "./room-details-sheet"
 import { BookNowSheet } from "./book-now-sheet"
 import { Room } from "@/data/roomData"
+import { ImageSliderModal } from "./image-slider-modal";
 
 interface roomsData {
     hotel: Room;
@@ -28,6 +30,7 @@ export default function HotelBookingCard({ hotel }: roomsData) {
     const [roomDetailsOpen, setRoomDetailsOpen] = useState(false)
     const [bookNowOpen, setBookNowOpen] = useState(false)
     const [roomCount, setRoomCount] = useState(1)
+    const [imageModalOpen, setImageModalOpen] = useState(false);
 
     const images = [
         "/slider-img-1.jpg",
@@ -42,7 +45,7 @@ export default function HotelBookingCard({ hotel }: roomsData) {
 
     return (
         <>
-            <div className="w-full overflow-hidden grid grid-cols-3 shadow-lg p-5 mt-2 bg-white rounded-md">
+            <div className="w-full overflow-hidden relative grid grid-cols-3 shadow-lg p-5 mt-2 bg-white rounded-md">
                 {/* Image Slider Section */}
                 <div className="relative col-span-1">
                     <Carousel className="w-full">
@@ -63,6 +66,11 @@ export default function HotelBookingCard({ hotel }: roomsData) {
                             </CarouselContent>
                             <CarouselPrevious className="absolute top-1/2 left-2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white p-1 rounded-full shadow" />
                             <CarouselNext className="absolute top-1/2 right-2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white p-1 rounded-full shadow" />
+                            <div
+                                onClick={() => setImageModalOpen(true)}
+                                className=" bg-white/80 size-7 rounded-xs cursor-pointer flex items-center justify-center absolute bottom-2 left-2">
+                                <FaRegCopy className=" text-gray-500" />
+                            </div>
                         </div>
                     </Carousel>
                 </div>
@@ -158,6 +166,12 @@ export default function HotelBookingCard({ hotel }: roomsData) {
                         </div>
                     </div>
                 </div>
+                <ImageSliderModal
+                    open={imageModalOpen}
+                    onOpenChange={setImageModalOpen}
+                    images={images}
+                    initialIndex={0}
+                />
             </div>
             <RoomDetailsSheet
                 open={roomDetailsOpen}
