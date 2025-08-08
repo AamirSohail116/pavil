@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { format, subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 import qs from "query-string";
@@ -20,6 +20,9 @@ const DateFilter = () => {
     const pathname = usePathname();
     const router = useRouter();
     const params = useSearchParams();
+    const [monthsToShow, setMonthsToShow] = useState(2);
+
+
 
     const accountId = params.get("accountId");
     const from = params.get("from") || "";
@@ -53,13 +56,18 @@ const DateFilter = () => {
         router.push(url);
     };
 
-    const onReset = () => {
-        setDate(undefined);
-        pushToUrl(undefined);
-    };
+    useEffect(() => {
+        const updateMonths = () => {
+            setMonthsToShow(window.innerWidth < 780 ? 1 : 2);
+        };
+
+        updateMonths();
+        window.addEventListener("resize", updateMonths);
+        return () => window.removeEventListener("resize", updateMonths);
+    }, []);
 
     return (
-        <div className=" col-span-6 w-full">
+        <div className=" col-span-12 sm:col-span-6 w-full">
             <div className=" flex items-center justify-between px-4 mb-1">
                 <span className=" text-[#008ace] font-[300] text-[10px] leading-[18px] uppercase">check in</span>
                 <span className=" text-[#008ace] font-[300] text-[10px] leading-[18px] uppercase">check in</span>
@@ -76,14 +84,14 @@ const DateFilter = () => {
                         {/* <ChevronDown className=" ml-2 size-4 opacity-50" /> */}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className=" lg:w-auto w-full p-0 " align="start">
+                <PopoverContent className="  w-full p-0 " align="start">
                     <Calendar
                         disabled={{ before: new Date() }}
                         mode="range"
                         defaultMonth={date?.from}
                         selected={date}
                         onSelect={setDate}
-                        numberOfMonths={2}
+                        numberOfMonths={monthsToShow}
                     />
                     <BookingLegend />
 
@@ -97,7 +105,7 @@ const DateFilter = () => {
 export default function DateFilterWithSuspense() {
     return (
         <Suspense fallback={
-            <div className="col-span-6 w-full">
+            <div className=" col-span-12 sm:col-span-6 w-full">
                 <div className="flex items-center justify-between px-4 mb-1">
                     <span className="text-[#008ace] font-[300] text-[10px] leading-[18px] uppercase">
                         check in

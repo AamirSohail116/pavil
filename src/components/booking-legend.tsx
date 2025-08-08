@@ -2,7 +2,7 @@ import { X } from 'lucide-react'
 
 export default function BookingLegend() {
     return (
-        <div className="flex flex-wrap items-center gap-4 py-2 px-6">
+        <div className=" grid grid-cols-2  md:flex items-center gap-2 py-2 px-6">
             {/* No check-ins */}
             <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-cyan-500 rounded-sm"></div>

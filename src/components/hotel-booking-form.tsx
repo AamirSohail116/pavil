@@ -120,8 +120,8 @@ export function HotelBookingForm({
 
     return (
         <Form {...form}>
-            <div className="w-full mx-auto grid lg:grid-cols-12 gap-4">
-                <div className="lg:col-span-7 space-y-6">
+            <div className="w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 mb-4">
+                <div className="col-span-12 lg:col-span-8 xl:col-span-7 space-y-6">
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-xl font-[500] leading-[24px]">{roomType}</CardTitle>
@@ -208,7 +208,7 @@ export function HotelBookingForm({
                     <ContactDetails form={form} />
                 </div>
 
-                <div className="lg:col-span-5">
+                <div className="col-span-12 lg:col-span-4 xl:col-span-5">
                     <BookingSummary
                         form={form}
                         roomType={roomType}

@@ -26,7 +26,7 @@ export default function RootLayout({
       <body
         className={`${robotoSlab.className} antialiased`}
       >
-        <div className=" w-full h-full max-w-[1400px] mx-auto px-[40px]">
+        <div className=" w-full h-full max-w-[1400px] mx-auto px-0 sm:px-[10px] lg:px-[40px]">
           <div className="sticky top-0 z-50 bg-white shadow-sm mx-auto ">
             <Navbar />
           </div>

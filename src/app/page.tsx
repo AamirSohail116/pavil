@@ -10,7 +10,7 @@ export default function Home() {
 
     <div className="">
       <HeroSection />
-      <BookingFilters />
+      {/* <BookingFilters /> */}
       <div className="space-y-2">
         {hotelRooms.map((hotel, index) => (
           <HotelBookingCard hotel={hotel} key={index} />

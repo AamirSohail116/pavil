@@ -90,7 +90,7 @@ export default function LanguageCurrencyMenu() {
 
     console.log(countries, "countries")
     return (
-        <div className="flex gap-2 justify-end mb-4">
+        <div className="flex gap-2  justify-center sm:justify-end mb-4">
             {/* Language/Country Dropdown */}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -100,9 +100,9 @@ export default function LanguageCurrencyMenu() {
                         </span>  <ChevronDown size={14} className="text-[#008ace]" />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className=" w-[700px] p-3 rounded-none">
+                <DropdownMenuContent className=" w-[200px] sm:w-[500px] lg:w-[700px] p-3 rounded-none">
                     <ScrollArea className="h-64">
-                        <div className=" grid grid-cols-4 space-y-2">
+                        <div className=" grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-4 space-y-2">
                             {countries.map((country) => (
                                 <DropdownMenuItem
                                     key={country.code}
@@ -128,9 +128,9 @@ export default function LanguageCurrencyMenu() {
                         {currency} <ChevronDown size={16} />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className=" w-[600px] p-3 rounded-none">
+                <DropdownMenuContent className=" w-[30px] sm:w-[250px] xl:w-[600px] p-3 rounded-none">
                     <ScrollArea className="h-64">
-                        <div className=" grid grid-cols-5 space-y-2">
+                        <div className=" grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-5 space-y-2">
                             {currencies.map((curr) => (
                                 <DropdownMenuItem
                                     key={curr.code}

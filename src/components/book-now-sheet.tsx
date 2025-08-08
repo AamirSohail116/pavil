@@ -35,7 +35,7 @@ export function BookNowSheet({ open, onOpenChange }: BookNowSheetProps) {
                         </div>
 
                         {/* Promotional Banner */}
-                        <div className="flex gap-6 h-[266px]">
+                        <div className="flex flex-col md:flex-row gap-6 h-[266px]">
                             <div className="flex-1 relative">
                                 <Image
                                     src="/offer-img.jpeg"

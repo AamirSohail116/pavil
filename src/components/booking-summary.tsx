@@ -82,22 +82,26 @@ export function BookingSummary({
                                 </Button>
                             </div>
 
-                            <div className="border p-4 rounded-md">
-                                <div className="flex justify-between items-center text-sm">
-                                    <div>
-                                        <div className="text-[#878787] text-[12px]">Check In</div>
-                                        <div>{checkIn}</div>
+                            <div className="border py-4 px-2 lg:p-4 rounded-md">
+                                <div className="flex flex-row justify-between items-center text-sm">
+                                    <div className=" flex flex-1 flex-col xl:flex-row xl:items-center gap-3">
+                                        <div>
+                                            <div className="text-[#878787] text-[12px]">Check In</div>
+                                            <div>{checkIn}</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-[#878787] text-[12px]">Check Out</div>
+                                            <div>{checkOut}</div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div className="text-[#878787] text-[12px]">Check Out</div>
-                                        <div>{checkOut}</div>
-                                    </div>
-                                    <div className="flex items-center gap-[2px]">
-                                        <div className="text-[#878787] text-[14px]">{room.guestCount}</div>
-                                        <BsPersonStanding className="size-5 text-[#212529]" />
-                                    </div>
-                                    <div className="flex items-center">
-                                        <span className="font-medium">MYR {roomPrice.toLocaleString()}</span>
+                                    <div className=" flex flex-1 items-center justify-between gap-2">
+                                        <div className="flex items-center gap-[2px]">
+                                            <div className="text-[#878787] text-[14px]">{room.guestCount}</div>
+                                            <BsPersonStanding className="size-5 text-[#212529]" />
+                                        </div>
+                                        <div className="flex items-center">
+                                            <span className="font-medium">MYR {roomPrice.toLocaleString()}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

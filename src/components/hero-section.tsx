@@ -3,7 +3,7 @@
 export function HeroSection() {
     return (
         <div>
-            <div className="relative h-[255px] w-full overflow-hidden ">
+            <div className="relative h-[120px] sm:h-[160px] md:h-[255px] w-full overflow-hidden ">
                 {/* Background Image */}
                 <img
                     src="/hero-bg.jpg"

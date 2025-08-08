@@ -44,7 +44,7 @@ export function RoomDetailsSheet({ open, onOpenChange }: RoomDetailsSheetProps) 
             <SheetContent side="right" className="w-full max-w-[900px] p-0 overflow-y-auto">
                 <div className="p-6">
                     <SheetHeader className="flex flex-row items-center justify-between space-y-0 pb-6 ">
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-col md:flex-row items-center gap-1 md:gap-4">
                             <SheetTitle className="text-[16px] font-[500] leading-[19px] text-black">One Bedroom Executive Suite</SheetTitle>
                             <div className="flex items-center gap-2 text-sm">
                                 <div className="flex items-center bg-[#dedede] font-bold text-black gap-1 px-[6px] py-[1px]">

@@ -32,20 +32,20 @@ export function GuestDetailsSection({
         <div className="space-y-4">
             <h3 className="text-lg font-[500]">{`Guest Details for Room ${roomNumber}`}</h3>
             <div className="space-y-4">
-                <div className=" flex">
+                <div className=" flex flex-col gap-1 sm:gap-0 sm:flex-row">
                     <div>
                         <div className="flex items-center space-x-2 text-sm text-red-500">
                             <span className=" text-black  text-[14px] font-[600]">Guest Details</span>
                             <span className="text-red-500">*</span>
                         </div>
-                        <div className=" flex gap-4">
+                        <div className=" flex flex-col sm:flex-row gap-2 xl:gap-4">
                             <FormField
                                 control={form.control}
                                 name={`rooms.${roomIndex}.firstName`}
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormControl>
-                                            <Input className=" h-[50px] w-[250px]" placeholder="First Name" value={field.value} onChange={field.onChange} />
+                                            <Input className=" h-[50px] w-full sm:w-[230px] xl:w-[250px]" placeholder="First Name" value={field.value} onChange={field.onChange} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -58,7 +58,7 @@ export function GuestDetailsSection({
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormControl>
-                                            <Input className=" h-[50px] w-[250px]" placeholder="Last Name" value={field.value} onChange={field.onChange} />
+                                            <Input className=" h-[50px] w-full sm:w-[230px] xl:w-[250px]" placeholder="Last Name" value={field.value} onChange={field.onChange} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -67,7 +67,7 @@ export function GuestDetailsSection({
                         </div>
                     </div>
 
-                    <div className=" ml-4">
+                    <div className=" ml-2 xl:ml-4">
                         <Label className="text-sm text-gray-600">Guest</Label>
                         <FormField
                             control={form.control}
@@ -76,7 +76,7 @@ export function GuestDetailsSection({
                                 <FormItem>
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
-                                            <SelectTrigger className=" w-[100px] py-6">
+                                            <SelectTrigger className=" w-[200px] sm:w-[100px] py-6">
                                                 <SelectValue />
                                             </SelectTrigger>
                                         </FormControl>
