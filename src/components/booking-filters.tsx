@@ -15,8 +15,8 @@ interface Room {
 }
 
 export function BookingFilters() {
-    const [checkIn, setCheckIn] = useState("22-10-2025")
-    const [checkOut, setCheckOut] = useState("21-11-2025")
+    // const [checkIn, setCheckIn] = useState("22-10-2025")
+    // const [checkOut, setCheckOut] = useState("21-11-2025")
     const [promoCode, setPromoCode] = useState("")
 
     const [rooms, setRooms] = useState<Room[]>([

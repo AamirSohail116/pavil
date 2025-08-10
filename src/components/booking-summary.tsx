@@ -1,4 +1,3 @@
-// components/booking-summary.tsx
 "use client";
 
 import type { UseFormReturn } from "react-hook-form"
@@ -9,48 +8,75 @@ import { Trash2 } from "lucide-react"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { BsPersonStanding } from "react-icons/bs";
 import Link from "next/link"
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { BookNowSheet } from "./book-now-sheet";
+import { Room } from "@/data/roomData";
+import { PriceBreakdownModal } from "./price-breakdown-modal";
 
 interface BookingSummaryProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     form: UseFormReturn<any>;
-    roomType: string;
-    roomPrice: number;
-    checkIn: string;
-    checkOut: string;
+    bookingData: Array<{
+        roomId: string;
+        roomType: string;
+        quantity: number;
+        price: number;
+        checkIn: string;
+        checkOut: string;
+    }>
+    roomInstances: Array<{
+        id: string;
+        roomTypeId: string;
+        firstName: string;
+        lastName: string;
+        guestCount: string;
+    }>;
+    roomTypes: Room[];
     onRemoveRoom: (roomId: string) => void;
 }
 
 export function BookingSummary({
     form,
-    roomType,
-    roomPrice,
-    checkIn,
-    checkOut,
-    onRemoveRoom
+    bookingData,
+    roomTypes,
+    onRemoveRoom,
+    roomInstances
 }: BookingSummaryProps) {
-    const rooms = form.watch("rooms") || [];
-    const totalAmount = roomPrice * rooms.length;
-    const [bookNowOpen, setBookNowOpen] = useState(false)
-    const router = useRouter();
     const [showPromoInput, setShowPromoInput] = useState(false);
     const [promoCode, setPromoCode] = useState("");
     const [promoError, setPromoError] = useState("");
+    const [bookNowOpen, setBookNowOpen] = useState(false)
+    const [priceBreakdownOpen, setPriceBreakdownOpen] = useState(false)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [selectedBookingItem, setSelectedBookingItem] = useState<any>(null)
 
-    const handleRemoveRoom = (roomId: string) => {
-        onRemoveRoom(roomId);
+    // Calculate total amount
+    const totalAmount = bookingData.reduce((sum, item) => {
+        return sum + (item.price * item.quantity);
+    }, 0);
 
-        // Use setTimeout to allow state update before checking length
-        setTimeout(() => {
-            const updatedRooms = form.getValues("rooms") || [];
-            if (updatedRooms.length === 0) {
-                router.push('/');
-            }
-        }, 0);
+    // Get room details
+    const getRoomDetails = (roomId: string) => {
+        return roomTypes.find(room => room.id === roomId);
     }
+
+    const calculateNights = (checkIn: string, checkOut: string) => {
+        const checkInDate = new Date(checkIn)
+        const checkOutDate = new Date(checkOut)
+        const timeDiff = checkOutDate.getTime() - checkInDate.getTime()
+        return Math.ceil(timeDiff / (1000 * 3600 * 24))
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handlePriceBreakdownClick = (bookingItem: any, room: Room | undefined) => {
+        setSelectedBookingItem({
+            ...bookingItem,
+            room,
+            nights: calculateNights(bookingItem.checkIn, bookingItem.checkOut),
+        })
+        setPriceBreakdownOpen(true)
+    }
+
 
     return (
         <>
@@ -64,56 +90,67 @@ export function BookingSummary({
                     </Link>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    {rooms.map((room: any, index: number) => (
-                        <div key={room.id} className="space-y-3">
-                            <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                    <h4 className="font-medium leading-[24px] text-[16px]">{roomType}</h4>
-                                    <span onClick={() => setBookNowOpen(true)} className="text-[#008ace] text-[12px] leading-[18px] font-[400] underline cursor-pointer">BOOK NOW</span>
-                                </div>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="p-1 hover:text-red-500 transition"
-                                    onClick={() => handleRemoveRoom(room.id)}
-                                >
-                                    <Trash2 className="h-4 w-4 text-gray-400 " />
-                                </Button>
-                            </div>
+                    {roomInstances.map((roomInstance) => {
+                        const bookingItem = bookingData.find(item => item.roomId === roomInstance.roomTypeId);
+                        if (!bookingItem) return null;
 
-                            <div className="border py-4 px-2 lg:p-4 rounded-md">
-                                <div className="flex flex-row justify-between items-center text-sm">
-                                    <div className=" flex flex-1 flex-col xl:flex-row xl:items-center gap-3">
-                                        <div>
-                                            <div className="text-[#878787] text-[12px]">Check In</div>
-                                            <div>{checkIn}</div>
+                        const room = getRoomDetails(bookingItem.roomId);
+
+                        return (
+                            <div key={roomInstance.id} className="space-y-3">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                        <h4 className="font-medium leading-[24px] text-[16px]">
+                                            {bookingItem.roomType}
+                                        </h4>
+                                        <span onClick={() => setBookNowOpen(true)} className="text-[#008ace] text-[12px] leading-[18px] font-[400] underline cursor-pointer">BOOK NOW</span>
+                                    </div>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="p-1 hover:text-red-500 transition"
+                                        onClick={() => onRemoveRoom(roomInstance.id)}
+                                    >
+                                        <Trash2 className="h-4 w-4 text-gray-400 " />
+                                    </Button>
+                                </div>
+
+                                <div className="border py-4 px-2 lg:p-4 rounded-md">
+                                    <div className="flex flex-row justify-between items-center text-sm">
+                                        <div className="flex flex-1 flex-col xl:flex-row xl:items-center gap-3">
+                                            <div>
+                                                <div className="text-[#878787] text-[12px]">Check In</div>
+                                                <div>{bookingItem.checkIn}</div>
+                                            </div>
+                                            <div>
+                                                <div className="text-[#878787] text-[12px]">Check Out</div>
+                                                <div>{bookingItem.checkOut}</div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <div className="text-[#878787] text-[12px]">Check Out</div>
-                                            <div>{checkOut}</div>
+                                        <div className="flex flex-1 items-center justify-between gap-2">
+                                            <div className="flex items-center gap-[2px]">
+                                                <div className="text-[#878787] text-[14px]">{room?.maxGuests || 2}</div>
+                                                <BsPersonStanding className="size-5 text-[#212529]" />
+                                            </div>
+                                            <div className="flex items-center">
+                                                <span className="font-medium">
+                                                    MYR {bookingItem.price.toFixed(2)}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className=" flex flex-1 items-center justify-between gap-2">
-                                        <div className="flex items-center gap-[2px]">
-                                            <div className="text-[#878787] text-[14px]">{room.guestCount}</div>
-                                            <BsPersonStanding className="size-5 text-[#212529]" />
-                                        </div>
-                                        <div className="flex items-center">
-                                            <span className="font-medium">MYR {roomPrice.toLocaleString()}</span>
-                                        </div>
-                                    </div>
+                                </div>
+                                <div className="flex justify-between text-sm mt-4 border-b pb-3">
+                                    <span>
+                                        Sub Total (<button
+                                            onClick={() => handlePriceBreakdownClick(bookingItem, room)}
+                                            className="text-[#008ace] cursor-pointer underline">Price breakdown</button>)
+                                    </span>
+                                    <span className="font-medium">MYR {bookingItem.price.toFixed(2)}</span>
                                 </div>
                             </div>
-
-                            <div className="flex justify-between text-sm mt-4">
-                                <span>
-                                    Sub Total (<button className="text-[#008ace] underline">Price breakdown</button>)
-                                </span>
-                                <span className="font-medium">MYR {roomPrice.toLocaleString()}</span>
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
 
                     <div className="border-t pt-4 space-y-3">
                         <div className="bg-[#f2f2f2] border border-[#c9c7c7] p-5 rounded-md">
@@ -169,7 +206,7 @@ export function BookingSummary({
 
                         <div className="flex justify-between font-semibold text-lg">
                             <span className="text-[14px] font-bold leading-[21px]">Total</span>
-                            <span className="text-[14px] font-bold leading-[21px]">MYR {totalAmount.toLocaleString()}</span>
+                            <span className="text-[14px] font-bold leading-[21px]">MYR {totalAmount.toFixed(2)}</span>
                         </div>
 
                         <div className="space-y-3">
@@ -223,6 +260,23 @@ export function BookingSummary({
                 open={bookNowOpen}
                 onOpenChange={setBookNowOpen}
             />
+            {selectedBookingItem && (
+                <PriceBreakdownModal
+                    open={priceBreakdownOpen}
+                    onOpenChange={setPriceBreakdownOpen}
+                    roomType={selectedBookingItem.roomType}
+                    checkIn={selectedBookingItem.checkIn}
+                    checkOut={selectedBookingItem.checkOut}
+                    basePrice={360} // You can calculate this based on your logic
+                    discount={{
+                        percentage: 10,
+                        amount: 36,
+                    }}
+                    nights={selectedBookingItem.nights}
+                    guests={selectedBookingItem.room?.maxGuests || 2}
+                    rooms={1}
+                />
+            )}
         </>
     )
 }

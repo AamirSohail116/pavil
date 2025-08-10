@@ -39,7 +39,6 @@ export default function LanguageCurrencyMenu() {
             try {
                 const res = await fetch("https://restcountries.com/v3.1/all?fields=name,cca2")
                 const data = await res.json()
-                console.log(data)
                 const formatted = data
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     .filter((c: any) => c.cca2) // Filter out entries without country code
@@ -88,7 +87,6 @@ export default function LanguageCurrencyMenu() {
         fetchCurrencies()
     }, [])
 
-    console.log(countries, "countries")
     return (
         <div className="flex gap-2  justify-center sm:justify-end mb-4">
             {/* Language/Country Dropdown */}

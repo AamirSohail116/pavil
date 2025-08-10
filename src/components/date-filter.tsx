@@ -1,10 +1,9 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { format, subDays } from "date-fns";
+import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
-import qs from "query-string";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import { formatDateRange } from "@/lib/utils";
 import { Button } from "./ui/button";
@@ -17,14 +16,11 @@ import {
 import BookingLegend from "./booking-legend";
 
 const DateFilter = () => {
-    const pathname = usePathname();
-    const router = useRouter();
     const params = useSearchParams();
     const [monthsToShow, setMonthsToShow] = useState(2);
 
 
 
-    const accountId = params.get("accountId");
     const from = params.get("from") || "";
     const to = params.get("to") || "";
 
@@ -38,23 +34,6 @@ const DateFilter = () => {
 
     const [date, setDate] = useState<DateRange | undefined>(paramsState);
 
-    const pushToUrl = (dateRange: DateRange | undefined) => {
-        const query = {
-            from: format(dateRange?.from || defaultFrom, "yyyy-MM-dd"),
-            to: format(dateRange?.to || defaultTo, "yyyy-MM-dd"),
-            accountId,
-        };
-
-        const url = qs.stringifyUrl(
-            {
-                url: pathname,
-                query,
-            },
-            { skipEmptyString: true, skipNull: true }
-        );
-
-        router.push(url);
-    };
 
     useEffect(() => {
         const updateMonths = () => {

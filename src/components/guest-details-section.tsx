@@ -1,8 +1,6 @@
-// components/guest-details-section.tsx
-
 "use client";
 import { UseFormReturn } from "react-hook-form"
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
+import { FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
@@ -14,23 +12,24 @@ interface GuestDetailsSectionProps {
     form: UseFormReturn<any>;
     roomIndex: number;
     roomId: string;
+    roomType: string;
+    maxGuests: number;
     showUseForAllRooms: boolean;
     onUseDetailsForAllRooms: (checked: boolean, roomIndex: number) => void;
     useDetailsForAllRooms: boolean;
 }
 export function GuestDetailsSection({
-    roomNumber,
     form,
     roomIndex,
-    roomId,
+    maxGuests,
     showUseForAllRooms,
     onUseDetailsForAllRooms,
     useDetailsForAllRooms
 }: GuestDetailsSectionProps) {
 
     return (
-        <div className="space-y-4">
-            <h3 className="text-lg font-[500]">{`Guest Details for Room ${roomNumber}`}</h3>
+        <div className="">
+            {/* <h3 className="text-lg font-[500]">{`Guest Details for Room ${roomNumber} (${roomType})`}hiii</h3> */}
             <div className="space-y-4">
                 <div className=" flex flex-col gap-1 sm:gap-0 sm:flex-row">
                     <div>
@@ -81,7 +80,7 @@ export function GuestDetailsSection({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {[1, 2, 3, 4, 5, 6].map((num) => (
+                                            {Array.from({ length: maxGuests }, (_, i) => i + 1).map((num) => (
                                                 <SelectItem key={num} value={num.toString()}>
                                                     {num}
                                                 </SelectItem>
