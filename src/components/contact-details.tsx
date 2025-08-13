@@ -18,10 +18,10 @@ export function ContactDetails({ form }: ContactDetailsProps) {
     const bookingForSomeoneElse = form.watch("bookingForSomeoneElse");
 
     return (
-        <Card className="mb-2">
+        <Card className="mb-2" >
             <CardHeader>
                 <CardTitle className="text-lg font-semibold leading-[28px]">Contact Details</CardTitle>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2" translate="no">
                     <FormField
                         control={form.control}
                         name="bookingForSomeoneElse"
@@ -47,7 +47,7 @@ export function ContactDetails({ form }: ContactDetailsProps) {
                                 control={form.control}
                                 name="contactFirstName"
                                 render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem translate="no">
                                         <FormControl>
                                             <Input
                                                 className="h-[50px]"
@@ -66,7 +66,7 @@ export function ContactDetails({ form }: ContactDetailsProps) {
                                 control={form.control}
                                 name="contactLastName"
                                 render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem translate="no">
                                         <FormControl>
                                             <Input
                                                 className="h-[50px]"
@@ -88,7 +88,7 @@ export function ContactDetails({ form }: ContactDetailsProps) {
                             <Label htmlFor="countryCode" className="text-[#535353]">Country code</Label>
                             <span className="text-red-500">*</span>
                         </div>
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-2" translate="no">
                             <Select defaultValue="+92">
                                 <SelectTrigger className="w-[100px] py-6">
                                     <SelectValue />
@@ -104,7 +104,7 @@ export function ContactDetails({ form }: ContactDetailsProps) {
                                 control={form.control}
                                 name="contactNumber"
                                 render={({ field }) => (
-                                    <FormItem className="flex-1">
+                                    <FormItem className="flex-1" translate="no">
                                         <FormControl>
                                             <Input
                                                 className="h-[50px]"
@@ -128,7 +128,7 @@ export function ContactDetails({ form }: ContactDetailsProps) {
                             control={form.control}
                             name="email"
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem translate="no">
                                     <FormControl>
                                         <Input
                                             className="h-[50px]"

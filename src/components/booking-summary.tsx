@@ -11,8 +11,11 @@ import Link from "next/link"
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { BookNowSheet } from "./book-now-sheet";
-import { Room } from "@/data/roomData";
+import { Room } from "@/types/hotel"; // Updated import
 import { PriceBreakdownModal } from "./price-breakdown-modal";
+import { useRouter } from "next/navigation";
+import { useCurrencyStore } from "@/store/useCurrencyStore";
+
 
 interface BookingSummaryProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,7 +35,7 @@ interface BookingSummaryProps {
         lastName: string;
         guestCount: string;
     }>;
-    roomTypes: Room[];
+    roomTypes: Room[]; // Updated type
     onRemoveRoom: (roomId: string) => void;
 }
 
@@ -50,15 +53,18 @@ export function BookingSummary({
     const [priceBreakdownOpen, setPriceBreakdownOpen] = useState(false)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [selectedBookingItem, setSelectedBookingItem] = useState<any>(null)
+    const router = useRouter()
+    const { rate, currencyCode } = useCurrencyStore();
 
     // Calculate total amount
-    const totalAmount = bookingData.reduce((sum, item) => {
-        return sum + (item.price * item.quantity);
-    }, 0);
+    const totalAmount = bookingData.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+    ) * rate;
 
-    // Get room details
+    // Get room details using the new backend structure
     const getRoomDetails = (roomId: string) => {
-        return roomTypes.find(room => room.id === roomId);
+        return roomTypes.find(room => room.id?.toString() === roomId);
     }
 
     const calculateNights = (checkIn: string, checkOut: string) => {
@@ -67,6 +73,7 @@ export function BookingSummary({
         const timeDiff = checkOutDate.getTime() - checkInDate.getTime()
         return Math.ceil(timeDiff / (1000 * 3600 * 24))
     }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handlePriceBreakdownClick = (bookingItem: any, room: Room | undefined) => {
         setSelectedBookingItem({
@@ -77,13 +84,16 @@ export function BookingSummary({
         setPriceBreakdownOpen(true)
     }
 
+    const handlePayNow = () => {
+        router.push("/success")
+    }
 
     return (
         <>
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="text-lg font-semibold leading-[28px]">Booking Details</CardTitle>
-                    <Link href={"/"}>
+                    <Link href={"/"} passHref>
                         <Button variant="outline" size="sm" className="bg-[#f3a32d] cursor-pointer px-6 py-5 hover:bg-[#f3a32d] hover:text-white text-white">
                             Book more
                         </Button>
@@ -100,12 +110,13 @@ export function BookingSummary({
                             <div key={roomInstance.id} className="space-y-3">
                                 <div className="flex items-start justify-between">
                                     <div className="flex-1">
-                                        <h4 className="font-medium leading-[24px] text-[16px]">
+                                        <h4 translate="no" className="font-medium leading-[24px] text-[16px]">
                                             {bookingItem.roomType}
                                         </h4>
-                                        <span onClick={() => setBookNowOpen(true)} className="text-[#008ace] text-[12px] leading-[18px] font-[400] underline cursor-pointer">BOOK NOW</span>
+                                        <span translate="no" onClick={() => setBookNowOpen(true)} className="text-[#008ace] text-[12px] leading-[18px] font-[400] underline cursor-pointer">BOOK NOW</span>
                                     </div>
                                     <Button
+                                        translate="no"
                                         variant="ghost"
                                         size="sm"
                                         className="p-1 hover:text-red-500 transition"
@@ -129,12 +140,12 @@ export function BookingSummary({
                                         </div>
                                         <div className="flex flex-1 items-center justify-between gap-2">
                                             <div className="flex items-center gap-[2px]">
-                                                <div className="text-[#878787] text-[14px]">{room?.maxGuests || 2}</div>
+                                                <div className="text-[#878787] text-[14px]">{room?.max_guests || 2}</div>
                                                 <BsPersonStanding className="size-5 text-[#212529]" />
                                             </div>
                                             <div className="flex items-center">
                                                 <span className="font-medium">
-                                                    MYR {bookingItem.price.toFixed(2)}
+                                                    {currencyCode} {(bookingItem.price * rate).toFixed(1)}
                                                 </span>
                                             </div>
                                         </div>
@@ -146,18 +157,18 @@ export function BookingSummary({
                                             onClick={() => handlePriceBreakdownClick(bookingItem, room)}
                                             className="text-[#008ace] cursor-pointer underline">Price breakdown</button>)
                                     </span>
-                                    <span className="font-medium">MYR {bookingItem.price.toFixed(2)}</span>
+                                    <span className="font-medium"> {currencyCode} {(bookingItem.price * rate).toFixed(1)}</span>
                                 </div>
                             </div>
                         );
                     })}
 
                     <div className="border-t pt-4 space-y-3">
-                        <div className="bg-[#f2f2f2] border border-[#c9c7c7] p-5 rounded-md">
+                        <div translate="no" className="bg-[#f2f2f2] border border-[#c9c7c7] p-5 rounded-md">
                             {!showPromoInput ? (
                                 <div className="text-sm">
                                     Do you have a promo code? <button
-                                        className="text-blue-600 underline"
+                                        className="text-blue-600 underline cursor-pointer"
                                         onClick={() => setShowPromoInput(true)}
                                     >
                                         Click here
@@ -167,7 +178,7 @@ export function BookingSummary({
                                 <div className="space-y-3">
                                     <div className="text-sm">
                                         Do you have a promo code? <button
-                                            className="text-blue-600 underline"
+                                            className="text-blue-600 underline cursor-pointer"
                                             onClick={() => setShowPromoInput(false)}
                                         >
                                             Click here
@@ -246,20 +257,22 @@ export function BookingSummary({
                             />
                         </div>
 
+
                         <Button
-                            type="submit"
-                            className="w-full rounded-sm bg-[#f3a32d] hover:bg-[#f3a32d] text-white py-3"
-                            onClick={form.handleSubmit((data) => console.log(data))}
+                            className="w-full cursor-pointer rounded-sm bg-[#f3a32d] hover:bg-[#f3a32d] text-white py-3"
+                            onClick={handlePayNow}
+                        // onClick={form.handleSubmit((data) => console.log(data))}
                         >
-                            Pay Now
+                            <span> Pay Now</span>
                         </Button>
+
                     </div>
                 </CardContent>
             </Card>
-            <BookNowSheet
+            {/* <BookNowSheet
                 open={bookNowOpen}
                 onOpenChange={setBookNowOpen}
-            />
+            /> */}
             {selectedBookingItem && (
                 <PriceBreakdownModal
                     open={priceBreakdownOpen}

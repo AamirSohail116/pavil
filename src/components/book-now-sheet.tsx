@@ -7,13 +7,15 @@ import {
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet"
+import { Room } from "@/types/hotel";
 
 interface BookNowSheetProps {
     open: boolean
-    onOpenChange: (open: boolean) => void
+    onOpenChange: (open: boolean) => void;
+    room: Room
 }
 
-export function BookNowSheet({ open, onOpenChange }: BookNowSheetProps) {
+export function BookNowSheet({ open, onOpenChange, room }: BookNowSheetProps) {
 
 
     return (

@@ -42,7 +42,7 @@ export function GuestDetailsSection({
                                 control={form.control}
                                 name={`rooms.${roomIndex}.firstName`}
                                 render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem translate="no">
                                         <FormControl>
                                             <Input className=" h-[50px] w-full sm:w-[230px] xl:w-[250px]" placeholder="First Name" value={field.value} onChange={field.onChange} />
                                         </FormControl>
@@ -55,7 +55,7 @@ export function GuestDetailsSection({
                                 control={form.control}
                                 name={`rooms.${roomIndex}.lastName`}
                                 render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem translate="no">
                                         <FormControl>
                                             <Input className=" h-[50px] w-full sm:w-[230px] xl:w-[250px]" placeholder="Last Name" value={field.value} onChange={field.onChange} />
                                         </FormControl>
@@ -72,7 +72,7 @@ export function GuestDetailsSection({
                             control={form.control}
                             name={`rooms.${roomIndex}.guestCount`}
                             render={({ field }) => (
-                                <FormItem>
+                                <FormItem translate="no">
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
                                             <SelectTrigger className=" w-[200px] sm:w-[100px] py-6">
@@ -97,9 +97,10 @@ export function GuestDetailsSection({
                 {showUseForAllRooms && (
                     <div className="flex items-center space-x-2">
                         <Checkbox
+                            translate="no"
                             id="useForAllRooms"
                             checked={useDetailsForAllRooms}
-                            onCheckedChange={(checked) => onUseDetailsForAllRooms?.(checked as boolean, roomIndex)}
+                            onCheckedChange={(checked: boolean) => onUseDetailsForAllRooms?.(checked as boolean, roomIndex)}
                         />
                         <Label htmlFor="useForAllRooms" className="text-sm text-gray-600">
                             Use these details for all rooms

@@ -3,6 +3,8 @@ import { Roboto_Slab } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import { GoogleTranslateScript } from "@/components/google-translate-script";
+import { QueryProvider } from "./providers/query-provider";
 
 const robotoSlab = Roboto_Slab({
   weight: ["400", "700"],
@@ -26,15 +28,19 @@ export default function RootLayout({
       <body
         className={`${robotoSlab.className} antialiased`}
       >
+        <GoogleTranslateScript />
         <div className=" w-full h-full max-w-[1400px] mx-auto px-0 sm:px-[10px] lg:px-[40px]">
           <div className="sticky top-0 z-50 bg-white shadow-sm mx-auto ">
             <Navbar />
           </div>
-          <main>
-            {children}
+          <main >
+            <QueryProvider>
+              {children}
+            </QueryProvider>
           </main>
           <Footer />
         </div>
+
       </body>
     </html>
   );
