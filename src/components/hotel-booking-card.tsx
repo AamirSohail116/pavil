@@ -334,7 +334,7 @@ export default function HotelBookingCard({ room, showSummary, check_in, check_ou
                 onOpenChange={setRoomDetailsOpen}
                 room={room}
             />
-            <BookNowSheet
+            <RoomDetailsSheet
                 open={bookNowOpen}
                 onOpenChange={setBookNowOpen}
                 room={room}
