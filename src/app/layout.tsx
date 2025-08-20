@@ -5,6 +5,7 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { GoogleTranslateScript } from "@/components/google-translate-script";
 import { QueryProvider } from "./providers/query-provider";
+import LocalStorageCleaner from "@/components/LocalStorageCleaner";
 
 const robotoSlab = Roboto_Slab({
   weight: ["400", "700"],
@@ -28,6 +29,7 @@ export default function RootLayout({
       <body
         className={`${robotoSlab.className} antialiased`}
       >
+        <LocalStorageCleaner />
         <GoogleTranslateScript />
         <div className=" w-full h-full max-w-[1400px] mx-auto px-0 sm:px-[10px] lg:px-[40px]">
           <div className="sticky top-0 z-50 bg-white shadow-sm mx-auto ">
