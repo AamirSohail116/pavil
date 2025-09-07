@@ -4,6 +4,8 @@ export const API = axios.create({
     baseURL: 'https://dormeodestinations.my/api',
 });
 
+// header
+
 API.defaults.headers.common['authorization'] = `Bearer ${`asdddddddddddddddddddd23443242342323AsaddwqeaS`}`;
 
 // export const setAuthHeader = (token = "asdddddddddddddddddddd23443242342323AsaddwqeaS") => {

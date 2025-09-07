@@ -124,6 +124,7 @@ export function BookingSummary({
     }
 
     // Handle payment submission
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handlePayNow = (formData: any) => {
         console.log('Form Data:', formData);
 
@@ -131,7 +132,7 @@ export function BookingSummary({
         const bookingItem = bookingData[0]; // Assuming first booking item
         const roomInstance = formData.rooms[0]; // Get first room from form data
 
-        if (!bookingItem || !roomInstance) {
+        if (!bookingItem || !roomInstance || !property) {
             console.error('Missing booking data or room instance');
             return;
         }
@@ -142,7 +143,7 @@ export function BookingSummary({
             check_in: bookingItem.checkIn,
             check_out: bookingItem.checkOut,
             guests: Number(roomInstance.guestCount),
-            property_id: property?.id!,
+            property_id: property.id,
             room_id: roomInstance.roomTypeId,
             first_name: roomInstance.firstName,
             last_name: roomInstance.lastName,
