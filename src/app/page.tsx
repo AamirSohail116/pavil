@@ -5,28 +5,33 @@ import { BookingFilters } from "@/components/booking-filters"
 import HotelBookingCard from "@/components/hotel-booking-card"
 import PropertyDetails from "@/components/property-details"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
-import { useEffect, useState, Suspense } from "react" // Add Suspense import
-import { HomeBookingSummary } from "@/components/HomeBookingSummary "
+import { useEffect, useState, Suspense } from "react"
 import { useGetRooms } from "@/API/useGetRooms"
 import { addDays, formatDate } from "@/lib/utils"
 import { Room } from "@/types/hotel"
 import { Loader } from "lucide-react"
 import { useSearchParams } from "next/navigation"
+import { usePropertyStore } from "@/hooks/usePropertyInfo"
+import { useGuestStore } from "@/store/useGuestStore"
 
 // Create a separate component for the main content
 function HomeContent() {
   const searchParams = useSearchParams()
-  const propertyIdFromUrl = searchParams.get("propertyId") || "1"
+  const propertyIdFromUrl = searchParams.get("propertyId") || "i10p1"
   const [bookingData] = useLocalStorage("bookingData", []);
   const [showSummary, setShowSummary] = useState(false);
+  const { setMaxGuests } = useGuestStore();
   const [filters, setFilters] = useLocalStorage("filters", {
     check_in: formatDate(new Date()),
     check_out: formatDate(addDays(new Date(), 1)),
-    guests: 3,
+    guests: 2,
     search: ""
   });
 
-  const combinedFilters = { ...filters, property_id: parseInt(propertyIdFromUrl) }
+  // Use the property store
+  const { updateProperty } = usePropertyStore()
+
+  const combinedFilters = { ...filters, property_id: (propertyIdFromUrl) }
 
   const { data, isLoading, refetch, isFetching, error, isError } = useGetRooms(combinedFilters);
 
@@ -36,6 +41,7 @@ function HomeContent() {
 
   const handleSearch = () => {
     setFilters(prev => ({ ...prev, search: "yes" }));
+    setMaxGuests(filters.guests);
     refetch();
   };
 
@@ -44,6 +50,17 @@ function HomeContent() {
       refetch();
     }
   }, []);
+
+  // Update property data in store when propertyData changes
+  useEffect(() => {
+    if (data?.property && data.property.id) {
+      updateProperty({
+        id: data.property.id,
+        name: data.property.name || '',
+        address: data.property.address || ''
+      })
+    }
+  }, [data?.property, updateProperty])
 
   useEffect(() => {
     if (bookingData.length > 0) {
@@ -95,23 +112,38 @@ function HomeContent() {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div className={`space-y-2 ${showSummary ? "lg:col-span-8" : "lg:col-span-12"}`}>
-          {rooms?.map((room: Room) => (
-            <HotelBookingCard
-              check_in={filters.check_in}
-              check_out={filters.check_out}
-              room={room}
-              key={room.id}
-              showSummary={showSummary}
-            />
-          ))}
+        <div className={`space-y-2  lg:col-span-12`}>
+          {rooms.length > 0 ? (
+            rooms.map((room: Room) => (
+              <HotelBookingCard
+                check_in={filters.check_in}
+                check_out={filters.check_out}
+                room={room}
+                key={room.id}
+                showSummary={showSummary}
+              />
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+              <div className="max-w-md mx-auto">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                  Oops! No Rooms Found
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  We couldnt find any available rooms for your selected dates and criteria.
+                  Try adjusting your filters or search for different dates to see more options.
+                </p>
+
+              </div>
+            </div>
+          )}
         </div>
 
-        {showSummary && (
+        {/* {showSummary && (
           <div className="lg:col-span-4 mt-2">
             <HomeBookingSummary roomTypes={rooms} setShowSummary={setShowSummary} />
           </div>
-        )}
+        )} */}
       </div>
 
       <div>

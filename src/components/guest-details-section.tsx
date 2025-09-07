@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Label } from "./ui/label";
+import { useGuestStore } from "@/store/useGuestStore";
 
 interface GuestDetailsSectionProps {
     roomNumber: number;
@@ -26,6 +27,7 @@ export function GuestDetailsSection({
     onUseDetailsForAllRooms,
     useDetailsForAllRooms
 }: GuestDetailsSectionProps) {
+    const { max_guests } = useGuestStore();
 
     return (
         <div className="">
@@ -73,7 +75,10 @@ export function GuestDetailsSection({
                             name={`rooms.${roomIndex}.guestCount`}
                             render={({ field }) => (
                                 <FormItem translate="no">
-                                    <Select onValueChange={field.onChange} value={field.value}>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value || max_guests.toString()} // default fallback
+                                    >
                                         <FormControl>
                                             <SelectTrigger className=" w-[200px] sm:w-[100px] py-6">
                                                 <SelectValue />
@@ -94,7 +99,7 @@ export function GuestDetailsSection({
                     </div>
                 </div>
 
-                {showUseForAllRooms && (
+                {/* {showUseForAllRooms && (
                     <div className="flex items-center space-x-2">
                         <Checkbox
                             translate="no"
@@ -106,7 +111,7 @@ export function GuestDetailsSection({
                             Use these details for all rooms
                         </Label>
                     </div>
-                )}
+                )} */}
             </div>
         </div>
     )

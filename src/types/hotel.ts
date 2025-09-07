@@ -10,19 +10,24 @@ export interface Hotel {
     address: string;
 }
 
+export interface RoomImage {
+    image_url: string;
+    caption: string;
+}
+
 export interface Room {
     id: string;
-    price_per_night: string;
-    quantity: number;
     room_name: string;
-    room_image: string;
-    slider_images: string[];
     room_description: string;
     room_size: string;
     max_guests: number;
-    beds: string;
+    price: number; // latest or base price
+    prices: Record<string, number>; // date => price mapping
+    images: RoomImage[];
     amenities: string[];
+    beds: Record<string, string[]>; // e.g. { "Room 1": ["1 King Bed", "1 Super Single Bed"] }
 }
+
 
 export interface SearchFilters {
     checkIn: Date | null;

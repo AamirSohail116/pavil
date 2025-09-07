@@ -44,7 +44,10 @@ interface BookingItem {
     price: number;
     checkIn: string;
     checkOut: string;
+    prices?: Record<string, number>;
+    max_guests?: number;
 }
+
 
 export function HotelBookingForm() {
     const router = useRouter()
@@ -53,24 +56,13 @@ export function HotelBookingForm() {
     const [roomTypes, setRoomTypes] = useState<Room[]>([]);
     const [bookingList, setBookingList] = useState(bookingData);
 
-    // Fetch room details for each booking item from API or cached data
     useEffect(() => {
         const fetchRoomDetails = async () => {
             try {
-                // You'll need to implement this API call based on your backend
-                // For now, I'll show how to structure it
+
                 const roomIds = bookingData.map(item => item.roomId);
                 if (roomIds.length === 0) return;
 
-                // Example API call - replace with your actual API endpoint
-                // const response = await fetch('/api/rooms', {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify({ roomIds })
-                // });
-                // const roomDetails = await response.json();
-
-                // For now, we'll create placeholder data based on booking data
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const roomDetails: any[] = bookingData.map(item => ({
                     id: item.roomId,
@@ -181,6 +173,7 @@ export function HotelBookingForm() {
         }
     }
 
+
     const groupedRooms = bookingList.map(bookingItem => {
         const roomType = roomTypes.find(rt => rt.id?.toString() === bookingItem.roomId);
         const roomsForType = form.getValues('rooms').filter(
@@ -233,7 +226,7 @@ export function HotelBookingForm() {
                                             roomIndex={form.getValues('rooms').findIndex(r => r.id === room.id)}
                                             roomId={room.id}
                                             roomType={group.roomType?.room_name || group.bookingItem.roomType || "Unknown Room Type"}
-                                            maxGuests={group.roomType?.max_guests || 2}
+                                            maxGuests={group.bookingItem?.max_guests || 2}
                                             showUseForAllRooms={groupIndex === 0 && roomIndex === 0}
                                             onUseDetailsForAllRooms={handleUseDetailsForAllRooms}
                                             useDetailsForAllRooms={useDetailsForAllRooms}

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const API = axios.create({
-    baseURL: 'https://hotel.remogen.com/api',
+    baseURL: 'https://dormeodestinations.my/api',
 });
 
 API.defaults.headers.common['authorization'] = `Bearer ${`asdddddddddddddddddddd23443242342323AsaddwqeaS`}`;
@@ -18,3 +18,11 @@ export const getCurrencyRate = (currency: number) =>
     API.post(`/get-currency-rate`, {
         currency
     });
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const createPayment = (data: any) =>
+    API.post(`/create-payment`, data);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const applyCouponCode = (data: any) =>
+    API.post(`/apply-coupon`, data);

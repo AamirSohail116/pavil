@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getRooms } from "./index";
 
 type RoomFilters = {
-    property_id: number;
+    property_id: string;
     check_in?: string; // "YYYY-MM-DD"
     check_out?: string; // "YYYY-MM-DD"
     guests?: number;

@@ -5,14 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { GoArrowUpRight } from "react-icons/go";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { FaBed, FaRegCopy, FaUser } from "react-icons/fa6";
+import { FaRegCopy, FaUser } from "react-icons/fa6";
 import { BsPersonStanding } from "react-icons/bs";
 import {
     Carousel,
@@ -22,13 +15,13 @@ import {
     CarouselPrevious,
 } from "@/components/ui/carousel";
 import { RoomDetailsSheet } from "./room-details-sheet";
-import { BookNowSheet } from "./book-now-sheet";
-import { Room } from "@/types/hotel"; // Updated import path
+import { Room } from "@/types/hotel"; // updated interface
 import { ImageSliderModal } from "./image-slider-modal";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useRouter } from "next/navigation";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 interface HotelBookingCardProps {
     room: Room;
@@ -44,93 +37,121 @@ interface BookingItem {
     price: number;
     checkIn: string;
     checkOut: string;
+    prices: Record<string, number>;
+    max_guests: number
 }
 
 export default function HotelBookingCard({ room, showSummary, check_in, check_out }: HotelBookingCardProps) {
     const [roomDetailsOpen, setRoomDetailsOpen] = useState(false);
-    const [bookNowOpen, setBookNowOpen] = useState(false);
     const [imageModalOpen, setImageModalOpen] = useState(false);
     const [cardOpen, setCardOpen] = useState(false);
     const [bookingData, setBookingData] = useLocalStorage<BookingItem[]>("bookingData", []);
     const { rate, currencyCode } = useCurrencyStore();
     const router = useRouter();
 
-    // Calculate available rooms using the new data structure
+    // Calculate available rooms (quantity optional now)
+    const bookedRooms = bookingData
+        .filter((item) => item.roomId === room.id?.toString())
+        .reduce((sum, item) => sum + item.quantity, 0);
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const bookedRooms = bookingData.filter((item: any) => item.roomId === room.id?.toString())
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .reduce((sum: number, item: any) => sum + item.quantity, 0);
-    const availableRooms = (room.quantity || 0) - bookedRooms;
+    const availableRooms = (room as any).quantity ? (room as any).quantity - bookedRooms : 5; // fallback: assume 5 available
 
     const [roomCount, setRoomCount] = useState(availableRooms > 0 ? 1 : 0);
 
-    // Handle images - use slider_images if available, fallback to room_image
-    const images = room.slider_images && room.slider_images.length > 0
-        ? room.slider_images
-        : room.room_image
-            ? [room.room_image]
-            : [];
+    // Handle images
+    const images = room.images || [];
 
-    // Calculate prices
-    const basePrice = parseFloat(room.price_per_night || "0");
-    const discountPercent = 10; // You might want to add this to your Room interface
-    const discountPrice = basePrice * (1 - discountPercent / 100);
+    // Flatten beds for display
+    // const allBeds = Object.values(room.beds || {}).flat().join(", ") || "N/A";
 
-    // Hardcoded dates for example
+    // Calculate prices dynamically from the prices object
+    const pricesObject = room.prices || {};
+    const priceEntries = Object.entries(pricesObject);
+
+    // Calculate total price and number of nights
+    const totalPrice = priceEntries.reduce((sum, [, price]) => sum + price, 0);
+    const numberOfNights = priceEntries.length;
+
+    // Format date function
+    const formatDate = (dateKey: string): string => {
+        // Convert "Sep 2, 25" format to "02-09-2025"
+        const [month, day, year] = dateKey.split(' ');
+        const monthMap: Record<string, string> = {
+            'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06',
+            'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+        };
+        const fullYear = year.length === 2 ? `20${year}` : year;
+        return `${day.replace(',', '').padStart(2, '0')}-${monthMap[month]}-${fullYear}`;
+    };
+
+    // const basePrice = room.price || 0;
+    // const discountPercent = 10;
+    // const discountPrice = basePrice * (1 - discountPercent / 100);
+
     const checkIn = check_in || "2025-11-20";
     const checkOut = check_out || "2025-11-21";
 
     React.useEffect(() => {
-        // Recalculate available rooms
-        const bookedRooms = bookingData.filter(item => item.roomId === room.id?.toString())
+        const booked = bookingData
+            .filter(item => item.roomId === room.id?.toString())
             .reduce((sum, item) => sum + item.quantity, 0);
-        const newAvailableRooms = (room.quantity || 0) - bookedRooms;
 
-        // Reset room count if it exceeds new availability
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const newAvailableRooms = (room as any).quantity ? (room as any).quantity - booked : 5;
+
         if (roomCount > newAvailableRooms) {
             setRoomCount(newAvailableRooms > 0 ? 1 : 0);
         }
-    }, [bookingData, room.id, room.quantity, roomCount]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    }, [bookingData, room.id, (room as any).quantity, roomCount]);
+
+    // const handleBookClick = () => {
+    //     setBookingData(prev => {
+    //         const newBookingData = [...prev];
+    //         const existingIndex = newBookingData.findIndex(item => item.roomId === room.id?.toString());
+
+    //         if (existingIndex >= 0) {
+    //             newBookingData[existingIndex] = {
+    //                 ...newBookingData[existingIndex],
+    //                 quantity: newBookingData[existingIndex].quantity + roomCount
+    //             };
+    //         } else {
+    //             newBookingData.push({
+    //                 roomId: room.id.toString(),
+    //                 roomType: room.room_name || "Unknown Room",
+    //                 quantity: roomCount,
+    //                 price: totalPrice,
+    //                 checkIn,
+    //                 checkOut
+    //             });
+    //         }
+    //         return newBookingData;
+    //     });
+
+    //     router.push("/reserve-booking");
+    // };
 
     const handleBookClick = () => {
-        // if (!room.id) return;
-
-        setBookingData(prev => {
-            const newBookingData = [...prev];
-            const existingIndex = newBookingData.findIndex(item => item.roomId === room.id?.toString());
-
-            if (existingIndex >= 0) {
-                newBookingData[existingIndex] = {
-                    ...newBookingData[existingIndex],
-                    quantity: newBookingData[existingIndex].quantity + roomCount
-                };
-            } else {
-                newBookingData.push({
-                    roomId: room.id.toString(),
-                    roomType: room.room_name || "Unknown Room",
-                    quantity: roomCount,
-                    price: discountPrice,
-                    checkIn,
-                    checkOut
-                });
-            }
-            return newBookingData;
-        });
+        // Clear all existing bookings and add only this room with quantity 1
+        setBookingData([{
+            roomId: room.id.toString(),
+            roomType: room.room_name || "Unknown Room",
+            quantity: 1, // Always 1 room
+            price: totalPrice,
+            checkIn,
+            checkOut,
+            prices: room.prices || [],
+            max_guests: room.max_guests
+        }]);
 
         router.push("/reserve-booking");
-    };
-
-    // Parse room description to extract plain text
-    const getPlainTextFromHTML = (html: string) => {
-        const div = document.createElement('div');
-        div.innerHTML = html;
-        return div.textContent || div.innerText || '';
     };
 
     return (
         <>
             <div className="w-full overflow-hidden relative grid grid-cols-12 md:grid-cols-3 shadow-lg px-2 py-4 lg:p-5 mt-2 bg-white rounded-md">
-                {/* Image Slider Section */}
+                {/* Image Slider */}
                 <div className="relative col-span-12 md:col-span-1">
                     <Carousel className="w-full">
                         <div className="relative">
@@ -139,12 +160,11 @@ export default function HotelBookingCard({ room, showSummary, check_in, check_ou
                                     <CarouselItem key={index}>
                                         <div className="relative h-[200px] w-full">
                                             <Image
-                                                src={image}
-                                                alt={`Hotel room view ${index + 1}`}
+                                                src={image.image_url}
+                                                alt={image.caption || `Hotel room view ${index + 1}`}
                                                 fill
                                                 className="object-cover rounded-md"
                                                 onError={(e) => {
-                                                    // Fallback image on error
                                                     e.currentTarget.src = '/placeholder-room.jpg';
                                                 }}
                                             />
@@ -168,7 +188,7 @@ export default function HotelBookingCard({ room, showSummary, check_in, check_ou
                     </Carousel>
                 </div>
 
-                {/* Content Section */}
+                {/* Content */}
                 <div className="col-span-12 md:col-span-2 ml-5">
                     <div className="space-y-4">
                         {/* Header */}
@@ -186,27 +206,37 @@ export default function HotelBookingCard({ room, showSummary, check_in, check_ou
                             </div>
 
                             <div className="flex items-center gap-2 text-sm">
-                                <div className="flex items-center bg-[#dedede] font-bold text-black gap-1 px-[6px] py-[1px]">
-                                    <span>{room.max_guests || 1}</span>
-                                    <FaUser className="w-4 h-3 text-black" />
-                                </div>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div className="flex items-center bg-[#dedede] font-bold text-black gap-1 px-[6px] py-[1px]">
+                                            <span>{room.max_guests || 1}</span>
+                                            <FaUser className="w-4 h-3 text-black" />
+                                        </div>
+                                    </TooltipTrigger>
+
+                                    <TooltipContent className="bg-white rounded-none text-black border border-gray-300 shadow-md">
+                                        <p>Maximum {room.max_guests || 1} Guests</p>
+                                    </TooltipContent>
+                                </Tooltip>
+
+
                                 <span className="flex items-center bg-[#dedede] font-bold text-black gap-1 px-[6px] py-[1px]">
                                     {room.room_size || "N/A"}
                                 </span>
-                                <div className="flex items-center bg-[#dedede] font-bold text-black gap-1 px-[6px] py-[1px]">
+                                {/* <div className="flex items-center bg-[#dedede] font-bold text-black gap-1 px-[6px] py-[1px]">
                                     <FaBed className="w-4 h-4" />
-                                    <span className="text-xs">{room.beds || "1"}</span>
-                                </div>
+                                    <span className="text-xs">{allBeds}</span>
+                                </div> */}
                             </div>
                         </div>
 
-                        {/* Book Now Section */}
+                        {/* Book Now */}
                         <div
-                            className={`space-y-3 flex flex-col ${showSummary ? "lg:flex-col xl:justify-between" : "lg:flex-row"
-                                } gap-1 lg:gap-5`}
+                            // className={`space-y-3 flex flex-col ${showSummary ? "lg:flex-col xl:justify-between" : "lg:flex-row"} gap-1 lg:gap-5`}
+                            className={`space-y-3 flex flex-col lg:flex-row gap-1 lg:gap-5`}
                         >
                             <div className="flex-1">
-                                <div>
+                                {/* <div>
                                     <h3 translate="no" className="font-[400] text-[14px] leading-normal text-black mb-1">
                                         BOOK NOW
                                     </h3>
@@ -217,7 +247,6 @@ export default function HotelBookingCard({ room, showSummary, check_in, check_ou
                                         More Info <GoArrowUpRight className="size-4 mt-[2px]" />
                                     </button>
                                 </div>
-                                {/* Discount Badges */}
                                 <div className="flex gap-2 mt-2">
                                     <div className="border text-[14px] font-bold py-[2px] px-1 border-[#ff0000]">
                                         {discountPercent}% Off
@@ -225,7 +254,7 @@ export default function HotelBookingCard({ room, showSummary, check_in, check_ou
                                     <button className="bg-red-600 hover:bg-red-700 px-2 py-1 text-white">
                                         Save {currencyCode} {(basePrice - discountPrice).toFixed(2)}
                                     </button>
-                                </div>
+                                </div> */}
                             </div>
 
                             <div className="flex md:ml-[100px] lg:ml-0 justify-between items-center gap-1 mt-2 sm:mt-0 sm:gap-3 lg:gap-5">
@@ -234,10 +263,8 @@ export default function HotelBookingCard({ room, showSummary, check_in, check_ou
                                     <BsPersonStanding className="size-5 text-[#696969]" />
                                 </div>
 
-                                <div className="flex flex-col items-center mr-5">
-                                    <span className="text-[12px] font-[300] text-[#696969]">
-                                        Room
-                                    </span>
+                                {/* <div className="flex flex-col items-center mr-5">
+                                    <span className="text-[12px] font-[300] text-[#696969]">Room</span>
                                     <Select
                                         value={roomCount.toString()}
                                         onValueChange={(val) => setRoomCount(parseInt(val))}
@@ -254,16 +281,16 @@ export default function HotelBookingCard({ room, showSummary, check_in, check_ou
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                </div>
+                                </div> */}
 
                                 <HoverCard open={cardOpen} onOpenChange={() => setCardOpen(!cardOpen)}>
                                     <HoverCardTrigger translate="no" onClick={() => setCardOpen(true)} asChild>
                                         <div className="text-right cursor-pointer">
-                                            <div className="text-[12px] font-normal text-black line-through">
+                                            {/* <div className="text-[12px] font-normal text-black line-through">
                                                 {currencyCode} {(basePrice * rate * roomCount).toFixed(1)}
-                                            </div>
+                                            </div> */}
                                             <div className="text-[16px] font-[500] text-black">
-                                                {currencyCode} {(discountPrice * rate * roomCount).toFixed(1)} ▶
+                                                {currencyCode} {(totalPrice * rate * roomCount).toFixed(1)} ▶
                                             </div>
                                             <div className="text-[10px] text-black font-normal">
                                                 Tax Inclusive
@@ -274,28 +301,30 @@ export default function HotelBookingCard({ room, showSummary, check_in, check_ou
                                         <div className="bg-white border border-gray-200 rounded-md shadow-lg">
                                             <div className="bg-black text-white p-3 text-center rounded-md">
                                                 <div className="text-[12px] leading-[14px] font-[400]">
-                                                    Rate for 1 Night {room.max_guests || 1} Guests {roomCount} Room
+                                                    Rate for {numberOfNights} Night{numberOfNights !== 1 ? 's' : ''} {room.max_guests || 1} Guests
                                                 </div>
                                             </div>
                                             <div className="p-4 space-y-3">
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-[12px] font-[400] text-[#212529]">{checkIn}</span>
-                                                    <div className="text-right">
-                                                        <div translate="no" className="text-[12px] line-through text-gray-500">
-                                                            {currencyCode} {(basePrice * rate * roomCount).toFixed(1)}
-                                                        </div>
-                                                        <div translate="no" className="text-[12px] font-medium">
-                                                            {currencyCode} {(discountPrice * rate * roomCount).toFixed(1)}
-                                                        </div>
-                                                        <div className="text-xs text-red-600">
-                                                            <span translate="no">Save</span> {currencyCode} {((basePrice - discountPrice) * rate * roomCount).toFixed(1)}
+                                                {priceEntries.map(([dateKey, price], index) => (
+                                                    <div key={index} className="flex justify-between items-center">
+                                                        <span className="text-[12px] font-[400] text-[#212529]">{(dateKey)}</span>
+                                                        <div className="text-right">
+                                                            {/* <div translate="no" className="text-[12px] line-through text-gray-500">
+                                                                {currencyCode} {(price * 1.1 * rate * roomCount).toFixed(1)}
+                                                            </div> */}
+                                                            <div translate="no" className="text-[12px] font-medium">
+                                                                {currencyCode} {(price * rate * roomCount).toFixed(1)}
+                                                            </div>
+                                                            {/* <div className="text-xs text-red-600">
+                                                                <span translate="no">Save</span> {currencyCode} {(price * 0.1 * rate * roomCount).toFixed(1)}
+                                                            </div> */}
                                                         </div>
                                                     </div>
-                                                </div>
+                                                ))}
                                                 <hr className="border-gray-200" />
                                                 <div className="flex justify-between items-center font-[500]">
                                                     <span>Total</span>
-                                                    <span translate="no">{currencyCode} {(discountPrice * rate * roomCount).toFixed(1)}</span>
+                                                    <span translate="no">{currencyCode} {(totalPrice * rate * roomCount).toFixed(1)}</span>
                                                 </div>
                                             </div>
                                             <div className="p-4 pt-0 text-right">
@@ -325,7 +354,7 @@ export default function HotelBookingCard({ room, showSummary, check_in, check_ou
                 <ImageSliderModal
                     open={imageModalOpen}
                     onOpenChange={setImageModalOpen}
-                    images={images}
+                    images={images.map(img => img.image_url)}
                     initialIndex={0}
                 />
             </div>
@@ -334,11 +363,11 @@ export default function HotelBookingCard({ room, showSummary, check_in, check_ou
                 onOpenChange={setRoomDetailsOpen}
                 room={room}
             />
-            <RoomDetailsSheet
+            {/* <BookNowSheet
                 open={bookNowOpen}
                 onOpenChange={setBookNowOpen}
                 room={room}
-            />
+            /> */}
         </>
     );
 }

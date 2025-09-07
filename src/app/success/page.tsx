@@ -5,8 +5,6 @@ import { BookingDetails } from "@/components/booking-details"
 import { GuestDetails } from "@/components/guest-details"
 import { DataTable } from "@/components/data-table"
 import { RatesSummary } from "@/components/rates-summary"
-import { Button } from "@/components/ui/button"
-import { Download, Mail, Phone } from "lucide-react"
 
 export default function PaymentSuccessPage() {
     const roomColumns = [

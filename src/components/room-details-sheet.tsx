@@ -24,6 +24,32 @@ interface RoomDetailsSheetProps {
 
 export function RoomDetailsSheet({ open, onOpenChange, room }: RoomDetailsSheetProps) {
 
+    // Function to format beds display
+    const formatBeds = (beds: Record<string, string[]> | undefined): string => {
+        if (!beds || typeof beds !== 'object') return '';
+
+        const allBeds: string[] = [];
+
+        // Extract all beds from all rooms
+        Object.keys(beds).forEach((roomKey: string) => {
+            const roomBeds = beds[roomKey];
+            if (Array.isArray(roomBeds)) {
+                allBeds.push(...roomBeds);
+            }
+        });
+
+        if (allBeds.length === 0) return '';
+
+        // Format the beds list with proper comma and "and" placement
+        if (allBeds.length === 1) {
+            return allBeds[0];
+        } else if (allBeds.length === 2) {
+            return allBeds.join(' and ');
+        } else {
+            const lastBed = allBeds.pop();
+            return allBeds.join(', ') + ', and ' + lastBed;
+        }
+    };
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange} >
@@ -50,12 +76,12 @@ export function RoomDetailsSheet({ open, onOpenChange, room }: RoomDetailsSheetP
                         <div className="relative">
                             <Carousel className="w-full max-w-[350px]">
                                 <CarouselContent>
-                                    {room?.slider_images.map((image, index) => (
+                                    {room?.images.map((image, index) => (
                                         <CarouselItem key={index}>
                                             <div className="relative h-[250px] w-full">
                                                 <Image
-                                                    src={image || "/placeholder.svg?height=320&width=600"}
-                                                    alt={`Room view ${index + 1}`}
+                                                    src={image.image_url || "/placeholder.svg?height=320&width=600"}
+                                                    alt={image.caption || "Image"}
                                                     fill
                                                     className="object-cover"
                                                 />
@@ -79,71 +105,27 @@ export function RoomDetailsSheet({ open, onOpenChange, room }: RoomDetailsSheetP
                                         ))}
                                     </ul>
                                 </div>
-                                {/* <div>
-                                    <h4 className="font-bold leading-[21px] text-[14px] text-black mb-3">Climate control</h4>
-                                    <ul className="space-y-2 text-gray-600">
-                                        {facilities.climateControl.map((item, index) => (
-                                            <li className=" font-[400] text-[12px] leading-[25px]" key={index}>{item}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold leading-[21px] text-[14px] text-black mb-3">Entertainment</h4>
-                                    <ul className="space-y-2 text-gray-600">
-                                        {facilities.entertainment.map((item, index) => (
-                                            <li className=" font-[400] text-[12px] leading-[25px]" key={index}>{item}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold leading-[21px] text-[14px] text-black mb-3">General Amenities</h4>
-                                    <ul className="space-y-2 text-gray-600">
-                                        {facilities.generalAmenities.map((item, index) => (
-                                            <li className=" font-[400] text-[12px] leading-[25px]" key={index}>{item}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold leading-[21px] text-[14px] text-black mb-3">Internet</h4>
-                                    <ul className="space-y-2 text-gray-600">
-                                        {facilities.internet.map((item, index) => (
-                                            <li className=" font-[400] text-[12px] leading-[25px]" key={index}>{item}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold leading-[21px] text-[14px] text-black mb-3">Kitchen Features</h4>
-                                    <ul className="space-y-2 text-gray-600">
-                                        {facilities.kitchenFeatures.map((item, index) => (
-                                            <li className=" font-[400] text-[12px] leading-[25px]" key={index}>{item}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold leading-[21px] text-[14px] text-black mb-3">Laundry Facilities</h4>
-                                    <ul className="space-y-2 text-gray-600">
-                                        {facilities.laundry.map((item, index) => (
-                                            <li className=" font-[400] text-[12px] leading-[25px]" key={index}>{item}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold leading-[21px] text-[14px] text-black mb-3">Room Features & Facilities</h4>
-                                    <ul className="space-y-2 text-gray-600">
-                                        {facilities.roomFeatures.map((item, index) => (
-                                            <li className=" font-[400] text-[12px] leading-[25px]" key={index}>{item}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold leading-[21px] text-[14px] text-black mb-3">Bedding Configuration</h4>
-                                    <ul className="space-y-2 text-gray-600">
-                                        {facilities.bedding.map((item, index) => (
-                                            <li className=" font-[400] text-[12px] leading-[25px]" key={index}>{item}</li>
-                                        ))}
-                                    </ul>
-                                </div> */}
                             </div>
+
+                            <h3 className="text-[16px] font-bold leading-[19px] mb-6 mt-8">Bedding Configuration</h3>
+                            <div className="gap-8">
+                                <div>
+                                    {room?.beds &&
+                                        Object.entries(room.beds).map(([roomName, beds], index) => (
+                                            <div key={index} className="mb-4">
+                                                <p className="font-bold text-[13px] leading-[20px] text-black">{roomName}</p>
+                                                <ul className="ml-4 list-none">
+                                                    {beds.map((bed, i) => (
+                                                        <li key={i} className="font-[400] text-[12px] leading-[20px] text-gray-600">
+                                                            {bed}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ))}
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>

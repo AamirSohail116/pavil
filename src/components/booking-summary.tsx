@@ -15,6 +15,9 @@ import { Room } from "@/types/hotel"; // Updated import
 import { PriceBreakdownModal } from "./price-breakdown-modal";
 import { useRouter } from "next/navigation";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
+import { applyCouponCode } from "@/API";
+import { usePropertyStore } from "@/hooks/usePropertyInfo";
+import { useCreatePayment } from "@/API/useCreatePayment";
 
 
 interface BookingSummaryProps {
@@ -27,6 +30,8 @@ interface BookingSummaryProps {
         price: number;
         checkIn: string;
         checkOut: string;
+        prices?: Record<string, number>;
+        max_guests?: number;
     }>
     roomInstances: Array<{
         id: string;
@@ -49,18 +54,52 @@ export function BookingSummary({
     const [showPromoInput, setShowPromoInput] = useState(false);
     const [promoCode, setPromoCode] = useState("");
     const [promoError, setPromoError] = useState("");
+    const [discountData, setDiscountData] = useState<{ discount: number, type: string } | null>(null);
     const [bookNowOpen, setBookNowOpen] = useState(false)
     const [priceBreakdownOpen, setPriceBreakdownOpen] = useState(false)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [selectedBookingItem, setSelectedBookingItem] = useState<any>(null)
+    const [selectedBookingItem, setSelectedBookingItem] = useState<any>(null);
     const router = useRouter()
     const { rate, currencyCode } = useCurrencyStore();
+    const { property } = usePropertyStore()
+
+    // Add payment mutation hook
+    const createPaymentMutation = useCreatePayment();
 
     // Calculate total amount
     const totalAmount = bookingData.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0
     ) * rate;
+
+
+    const discountedTotal = discountData
+        ? discountData.type === "percentage"
+            ? totalAmount - (totalAmount * (Number(discountData.discount) / 100))
+            : totalAmount - Number(discountData.discount)
+        : null;
+
+    const handleApplyCoupon = async () => {
+        if (!promoCode.trim()) {
+            setPromoError("Please enter promo code");
+            return;
+        }
+        setPromoError("");
+
+        try {
+            const res = await applyCouponCode({
+                coupon: promoCode,
+                property_id: property?.id
+            });
+
+            if (res.data && res.data.data) {
+                setDiscountData(res.data.data);
+            }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (err: any) {
+            setPromoError(err?.response?.data?.message || "Failed to apply coupon");
+        }
+    };
 
     // Get room details using the new backend structure
     const getRoomDetails = (roomId: string) => {
@@ -84,20 +123,57 @@ export function BookingSummary({
         setPriceBreakdownOpen(true)
     }
 
-    const handlePayNow = () => {
-        router.push("/success")
-    }
+    // Handle payment submission
+    const handlePayNow = (formData: any) => {
+        console.log('Form Data:', formData);
+
+        // Get the first booking item and room instance
+        const bookingItem = bookingData[0]; // Assuming first booking item
+        const roomInstance = formData.rooms[0]; // Get first room from form data
+
+        if (!bookingItem || !roomInstance) {
+            console.error('Missing booking data or room instance');
+            return;
+        }
+
+        // Map the form data to payment API format
+        const paymentData = {
+            // Required fields
+            check_in: bookingItem.checkIn,
+            check_out: bookingItem.checkOut,
+            guests: Number(roomInstance.guestCount),
+            property_id: property?.id!,
+            room_id: roomInstance.roomTypeId,
+            first_name: roomInstance.firstName,
+            last_name: roomInstance.lastName,
+            contact_no: formData.contactNumber,
+            email: formData.email,
+
+            // Optional fields
+            coupon_code: promoCode || "",
+            special_request: formData.specialRequest || "",
+            estimated_arrival_time: formData.estimatedArrival || "",
+            booking_for_other: formData.bookingForSomeoneElse ? "yes" : "no",
+            other_first_name: formData.contactFirstName || "",
+            other_last_name: formData.contactLastName || ""
+        };
+
+        console.log('Payment Data to be sent:', paymentData);
+
+        // Submit payment
+        createPaymentMutation.mutate(paymentData);
+    };
 
     return (
         <>
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="text-lg font-semibold leading-[28px]">Booking Details</CardTitle>
-                    <Link href={"/"} passHref>
+                    {/* <Link href={"/"} passHref>
                         <Button variant="outline" size="sm" className="bg-[#f3a32d] cursor-pointer px-6 py-5 hover:bg-[#f3a32d] hover:text-white text-white">
                             Book more
                         </Button>
-                    </Link>
+                    </Link> */}
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {roomInstances.map((roomInstance) => {
@@ -106,6 +182,7 @@ export function BookingSummary({
 
                         const room = getRoomDetails(bookingItem.roomId);
 
+
                         return (
                             <div key={roomInstance.id} className="space-y-3">
                                 <div className="flex items-start justify-between">
@@ -113,7 +190,7 @@ export function BookingSummary({
                                         <h4 translate="no" className="font-medium leading-[24px] text-[16px]">
                                             {bookingItem.roomType}
                                         </h4>
-                                        <span translate="no" onClick={() => setBookNowOpen(true)} className="text-[#008ace] text-[12px] leading-[18px] font-[400] underline cursor-pointer">BOOK NOW</span>
+                                        {/* <span translate="no" onClick={() => setBookNowOpen(true)} className="text-[#008ace] text-[12px] leading-[18px] font-[400] underline cursor-pointer">BOOK NOW</span> */}
                                     </div>
                                     <Button
                                         translate="no"
@@ -140,7 +217,7 @@ export function BookingSummary({
                                         </div>
                                         <div className="flex flex-1 items-center justify-between gap-2">
                                             <div className="flex items-center gap-[2px]">
-                                                <div className="text-[#878787] text-[14px]">{room?.max_guests || 2}</div>
+                                                <div className="text-[#878787] text-[14px]">{bookingItem?.max_guests || 2}</div>
                                                 <BsPersonStanding className="size-5 text-[#212529]" />
                                             </div>
                                             <div className="flex items-center">
@@ -198,8 +275,7 @@ export function BookingSummary({
                                                     setPromoError("Please enter promo code");
                                                 } else {
                                                     setPromoError("");
-                                                    // Handle promo code application logic here
-                                                    console.log("Applying promo code:", promoCode);
+                                                    handleApplyCoupon()
                                                 }
                                             }}
                                         >
@@ -214,11 +290,19 @@ export function BookingSummary({
                                 </div>
                             )}
                         </div>
-
                         <div className="flex justify-between font-semibold text-lg">
                             <span className="text-[14px] font-bold leading-[21px]">Total</span>
-                            <span className="text-[14px] font-bold leading-[21px]">MYR {totalAmount.toFixed(2)}</span>
+                            <span className={`text-[14px] font-bold leading-[21px] ${discountedTotal ? "line-through text-gray-500" : ""}`}>MYR {totalAmount.toFixed(2)}</span>
+
                         </div>
+                        {
+                            discountedTotal && (
+                                <div className="flex justify-between font-semibold text-lg">
+                                    <span className="text-[14px] font-bold leading-[21px]">Discounted Total</span>
+                                    <span className="text-[14px] font-bold leading-[21px]">MYR {discountedTotal.toFixed(2)}</span>
+                                </div>
+                            )
+                        }
 
                         <div className="space-y-3">
                             <FormField
@@ -231,8 +315,14 @@ export function BookingSummary({
                                         </FormControl>
                                         <div className="text-[12px] font-[400] leading-[18px]">
                                             By booking, you have agreed to our{" "}
-                                            <button className="text-blue-600 underline">Terms and Conditions</button> |
-                                            <button className="text-blue-600 underline">Payment Terms</button>
+                                            <Link
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                href={"https://dormeodestinations.my/terms-&-conditions"} className="text-blue-600 underline">Terms and Conditions</Link> |
+                                            <Link
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                href={"https://dormeodestinations.my/payment-term"} className="text-blue-600 underline">Payment Terms</Link>
                                             <FormMessage />
                                         </div>
                                     </FormItem>
@@ -249,7 +339,7 @@ export function BookingSummary({
                                         </FormControl>
                                         <div className="space-y-1 leading-none">
                                             <FormLabel className="text-[12px] font-[400] leading-[18px] text-black">
-                                                Subscribe to Pavilion Ceylon Hill Suites by Perfect Host Newsletter
+                                                Subscribe to Royce Residences by Dormeo Destinations Newsletter
                                             </FormLabel>
                                         </div>
                                     </FormItem>
@@ -260,10 +350,10 @@ export function BookingSummary({
 
                         <Button
                             className="w-full cursor-pointer rounded-sm bg-[#f3a32d] hover:bg-[#f3a32d] text-white py-3"
-                            onClick={handlePayNow}
-                        // onClick={form.handleSubmit((data) => console.log(data))}
+                            onClick={form.handleSubmit(handlePayNow)}
+                            disabled={createPaymentMutation.isPending}
                         >
-                            <span> Pay Now</span>
+                            <span>{createPaymentMutation.isPending ? 'Processing...' : 'Pay Now'}</span>
                         </Button>
 
                     </div>
@@ -285,8 +375,9 @@ export function BookingSummary({
                         percentage: 10,
                         amount: 36,
                     }}
+                    prices={selectedBookingItem.prices}
                     nights={selectedBookingItem.nights}
-                    guests={selectedBookingItem.room?.maxGuests || 2}
+                    max_guests={selectedBookingItem.max_guests}
                     rooms={1}
                 />
             )}

@@ -40,18 +40,27 @@ const PropertyDetails = ({ propertyData }: propertyDetailsProps) => {
                     </p>
 
                     <div className="flex flex-wrap items-center gap-4 text-sm mt-6">
-                        <Link href={"#"} className="text-[#008ace] underline text-[12px] font-[400]">
+                        <Link
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href={"https://dormeodestinations.my"} className="text-[#008ace] underline text-[12px] font-[400]">
                             Home
                         </Link>
-                        <Link href={"#"} className="text-[#008ace] underline text-[12px] font-[400]">
+                        <Link
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href={"https://dormeodestinations.my/about-us"} className="text-[#008ace] underline text-[12px] font-[400]">
                             About Us
                         </Link>
-                        <Link href={"#"} className="text-[#008ace] underline text-[12px] font-[400]">
+                        <Link
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href={"https://dormeodestinations.my/privacy-policy"} className="text-[#008ace] underline text-[12px] font-[400]">
                             Privacy Policy
                         </Link>
-                        <Link href={"#"} className="text-[#008ace] underline text-[12px] font-[400]">
+                        {/* <Link href={"#"} className="text-[#008ace] underline text-[12px] font-[400]">
                             Manage Bookings
-                        </Link>
+                        </Link> */}
                     </div>
                 </div>
             </div>

@@ -3,6 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useCurrencyStore } from "@/store/useCurrencyStore"
 
 interface PriceBreakdownModalProps {
     open: boolean
@@ -16,8 +17,9 @@ interface PriceBreakdownModalProps {
         amount: number
     }
     nights: number
-    guests: number
+    max_guests: number
     rooms: number
+    prices: Record<string, number>
 }
 
 export function PriceBreakdownModal({
@@ -29,11 +31,32 @@ export function PriceBreakdownModal({
     basePrice,
     discount,
     nights,
-    guests,
+    max_guests,
     rooms,
+    prices
 }: PriceBreakdownModalProps) {
     const discountAmount = discount?.amount || 0
     const finalPrice = basePrice - discountAmount
+    const { rate, currencyCode } = useCurrencyStore();
+
+    const pricesObject = prices || {};
+    const priceEntries = Object.entries(pricesObject);
+
+    // Calculate total price and number of nights
+    const totalPrice = priceEntries.reduce((sum, [, price]) => sum + price, 0);
+    const numberOfNights = priceEntries.length;
+
+    // Format date function
+    const formatDate = (dateKey: string): string => {
+        // Convert "Sep 2, 25" format to "02-09-2025"
+        const [month, day, year] = dateKey.split(' ');
+        const monthMap: Record<string, string> = {
+            'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06',
+            'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+        };
+        const fullYear = year.length === 2 ? `20${year}` : year;
+        return `${day.replace(',', '').padStart(2, '0')}-${monthMap[month]}-${fullYear}`;
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -54,25 +77,30 @@ export function PriceBreakdownModal({
 
                     <div className="border space-y-4 rounded-md">
                         {/* Date and Base Price */}
-                        <div className="flex justify-between items-center border-b p-3 ">
-                            <div className="text-sm text-gray-600">{checkIn}</div>
-                            <div className="text-sm font-medium">MYR {basePrice.toFixed(0)}</div>
+                        <div className="">
+                            {priceEntries.map(([dateKey, price], index) => (
+                                <div key={index} className="flex justify-between items-center border-b p-3 ">
+                                    <div className="text-sm text-gray-600">{(dateKey)}</div>
+                                    <div className="text-sm font-medium">{currencyCode} {(price * rate).toFixed(1)}</div>
+                                </div>
+                            ))}
                         </div>
 
+
                         {/* Discount */}
-                        {discount && (
+                        {/* {discount && (
                             <div className="flex justify-between items-center border-b pt-0 px-3 pb-3">
                                 <div className="text-sm text-red-500">{discount.percentage}% Off</div>
                                 <div className="text-sm text-red-500">(-) MYR {discountAmount.toFixed(0)}</div>
                             </div>
-                        )}
+                        )} */}
 
                         {/* Subtotal */}
                         <div className="flex justify-between items-center border-b pt-0 px-3 pb-3">
                             <div className="text-sm text-gray-600">
-                                Total Rate for {nights} Night {guests} Guests {rooms} Room
+                                Total Rate for {numberOfNights} Night{numberOfNights !== 1 ? 's' : ''} {max_guests || 1} Guests
                             </div>
-                            <div className="text-sm font-medium">MYR {finalPrice.toFixed(0)}</div>
+                            <div className="text-sm font-medium">{currencyCode} {(totalPrice * rate).toFixed(1)}</div>
                         </div>
                     </div>
 
@@ -80,7 +108,7 @@ export function PriceBreakdownModal({
                     <div className="border p-3">
                         <div className="flex justify-between items-center">
                             <div className="text-base font-semibold">Total</div>
-                            <div className="text-base font-semibold">MYR {finalPrice.toFixed(0)}</div>
+                            <div className="text-base font-semibold">{currencyCode} {(totalPrice * rate).toFixed(1)}</div>
                         </div>
                     </div>
                 </div>
