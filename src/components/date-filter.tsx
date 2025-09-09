@@ -222,7 +222,7 @@ const DateFilter = ({ onDateChange, initialFrom, initialTo }: DateFilterProps) =
 
                             if (typeof info.baseRate === "number") {
                                 return (
-                                    <span className="flex items-center justify-center text-green-500 w-full text-[1px] opacity-80">
+                                    <span className="flex items-center justify-center text-[#17762c] font-[500] w-full text-[1px] opacity-80">
                                         {info.baseRate}
                                     </span>
                                 );
