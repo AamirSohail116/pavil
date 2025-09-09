@@ -10,83 +10,117 @@ import { useGetRooms } from "@/API/useGetRooms"
 import { addDays, formatDate } from "@/lib/utils"
 import { Room } from "@/types/hotel"
 import { Loader } from "lucide-react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { usePropertyStore } from "@/hooks/usePropertyInfo"
 import { useGuestStore } from "@/store/useGuestStore"
 import { useRoomIdStore } from "@/hooks/useRoomId"
-import { getDefaultDateRange, useGetRoomRates } from "@/API/useGetRoomRates"
 
 // Create a separate component for the main content
 function HomeContent() {
   const searchParams = useSearchParams()
-  const propertyIdFromUrl = searchParams.get("propertyId") || "i10p1"
-  const [bookingData] = useLocalStorage("bookingData", []);
-  const [showSummary, setShowSummary] = useState(false);
-  const { setMaxGuests } = useGuestStore();
+  const router = useRouter()
+
+  const propertyIdFromUrl = searchParams.get("propertyId")
+
+  // Redirect immediately if no propertyId is found
+  useEffect(() => {
+    if (!propertyIdFromUrl) {
+      window.location.href = "https://dormeodestinations.my/"
+    }
+  }, [propertyIdFromUrl])
+
+  const [bookingData] = useLocalStorage("bookingData", [])
+  const [showSummary, setShowSummary] = useState(false)
+  const { setMaxGuests } = useGuestStore()
   const [filters, setFilters] = useLocalStorage("filters", {
     check_in: formatDate(new Date()),
     check_out: formatDate(addDays(new Date(), 1)),
     guests: 2,
     search: ""
-  });
+  })
 
-  // Use the property store
+  const [adjustCount, setAdjustCount] = useState(0)
+  const [isAdjusting, setIsAdjusting] = useState(false)
+  const MAX_ADJUSTS = 30 // Limit to prevent excessive API calls
+
   const { updateProperty } = usePropertyStore()
-  const { setRoomId } = useRoomIdStore();
+  const { setRoomId } = useRoomIdStore()
 
+  const combinedFilters = { ...filters, property_id: propertyIdFromUrl ?? "" }
 
-
-
-  const combinedFilters = { ...filters, property_id: (propertyIdFromUrl) }
-
-  const { data, isLoading, refetch, isFetching, error, isError } = useGetRooms(combinedFilters);
+  const { data, isLoading, refetch, isFetching, error, isError } = useGetRooms(combinedFilters)
 
   const handleFilterChange = (newFilters: Partial<typeof filters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters, search: "" }));
-  };
+    setFilters(prev => ({ ...prev, ...newFilters }))
+  }
 
   const handleSearch = () => {
-    setFilters(prev => ({ ...prev, search: "yes" }));
-    setMaxGuests(filters.guests);
-    refetch();
-  };
+    setFilters(prev => ({ ...prev, search: "yes" }))
+    setMaxGuests(filters.guests)
+    refetch()
+  }
 
   useEffect(() => {
     if (!data) {
-      refetch();
+      refetch()
     }
-  }, []);
+  }, [])
 
-  // Update property data in store when propertyData changes
   useEffect(() => {
-    if (data?.property && data.property.id) {
-      // update property store
+    if (filters.search === "yes") {
+      setFilters(prev => ({ ...prev, search: "" }))
+      setMaxGuests(filters.guests)
+      refetch()
+    }
+  }, [filters.search, filters.guests, setMaxGuests, refetch, setFilters])
+
+  useEffect(() => {
+    if (!isLoading && !isFetching && data && data.rooms.length === 0 && adjustCount < MAX_ADJUSTS) {
+      setIsAdjusting(true)
+      setAdjustCount(prev => prev + 1)
+      const currentFrom = new Date(filters.check_in)
+      const newFrom = addDays(currentFrom, 1)
+      const newTo = addDays(newFrom, 1)
+      setFilters(prev => ({
+        ...prev,
+        check_in: formatDate(newFrom),
+        check_out: formatDate(newTo),
+        search: "yes"
+      }))
+    } else if (data && data.rooms.length > 0) {
+      setIsAdjusting(false)
+    }
+  }, [isLoading, isFetching, data, adjustCount, filters.check_in, setFilters])
+
+  useEffect(() => {
+    if (data?.property?.id) {
       updateProperty({
         id: data.property.id,
         name: data.property.name || "",
         address: data.property.address || ""
-      });
-
-      // only update propertyId if rooms exist
+      })
       if (data?.rooms && data.rooms.length > 0) {
-        setRoomId(data.rooms[0].roomId);
+        setRoomId(data.rooms[0].roomId)
       }
     }
-  }, [data?.property, data?.rooms, updateProperty, setRoomId]);
-
+  }, [data?.property, data?.rooms, updateProperty, setRoomId])
 
   useEffect(() => {
     if (bookingData.length > 0) {
       const timer = setTimeout(() => {
-        setShowSummary(true);
-      }, 500);
-      return () => clearTimeout(timer);
+        setShowSummary(true)
+      }, 500)
+      return () => clearTimeout(timer)
     } else {
-      setShowSummary(false);
+      setShowSummary(false)
     }
-  }, [bookingData]);
+  }, [bookingData])
 
-  if (isLoading || isFetching) {
+  if (!propertyIdFromUrl) {
+    return null // Prevent rendering until redirect
+  }
+
+  if (isLoading || isFetching || isAdjusting) {
     return (
       <div className="h-[80vh] flex items-center justify-center">
         <Loader className="animate-spin h-10 w-10 text-gray-500" />
@@ -94,11 +128,13 @@ function HomeContent() {
     )
   }
 
-  if (isError) {
+  if (isError || (adjustCount >= MAX_ADJUSTS && data?.rooms.length === 0)) {
     return (
       <div className="h-[100vh] flex flex-col items-center justify-center text-center space-y-4">
         <p className="text-red-500 font-medium">
-          {error instanceof Error ? error.message : "Something went wrong while fetching rooms."}
+          {error instanceof Error ? error.message : adjustCount >= MAX_ADJUSTS
+            ? "No availability found in the next 30 days. Try selecting later dates manually."
+            : "Something went wrong while fetching rooms."}
         </p>
         <button
           onClick={() => refetch()}
@@ -107,12 +143,12 @@ function HomeContent() {
           Try Again
         </button>
       </div>
-    );
+    )
   }
 
-  const rooms = data?.rooms || [];
-  const propertyData = data?.property || {};
-  const currencies = data?.currencies || [];
+  const rooms = data?.rooms || []
+  const propertyData = data?.property || {}
+  const currencies = data?.currencies || []
 
   return (
     <div className="">
@@ -125,7 +161,7 @@ function HomeContent() {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div className={`space-y-2  lg:col-span-12`}>
+        <div className="space-y-2 lg:col-span-12">
           {rooms.length > 0 ? (
             rooms.map((room: Room) => (
               <HotelBookingCard
@@ -134,6 +170,7 @@ function HomeContent() {
                 room={room}
                 key={room.id}
                 showSummary={showSummary}
+                propertyId={propertyIdFromUrl}
               />
             ))
           ) : (
@@ -146,17 +183,10 @@ function HomeContent() {
                   We couldnt find any available rooms for your selected dates and criteria.
                   Try adjusting your filters or search for different dates to see more options.
                 </p>
-
               </div>
             </div>
           )}
         </div>
-
-        {/* {showSummary && (
-          <div className="lg:col-span-4 mt-2">
-            <HomeBookingSummary roomTypes={rooms} setShowSummary={setShowSummary} />
-          </div>
-        )} */}
       </div>
 
       <div>

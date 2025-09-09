@@ -55,7 +55,7 @@ const PaymentRedirectContent = () => {
         return (
             <div className="min-h-[79vh] flex items-center justify-center bg-gray-50">
                 <div className="text-center bg-white p-8 rounded-lg shadow-md w-full mx-4">
-                    <h2 className="text-2xl font-bold text-gray-600 mb-2">No Data Available</h2>
+                    <h2 className="text-2xl font-bold text-gray-600 mb-2"> Available</h2>
                     <p className="text-gray-600 mb-4">Booking confirmation data is not available.</p>
                 </div>
             </div>
@@ -66,18 +66,16 @@ const PaymentRedirectContent = () => {
         { header: "Room Type", key: "roomType" },
         { header: "Guest(s)", key: "guests" },
         { header: "No of rooms", key: "rooms", className: "text-center" },
-        { header: "Package if any", key: "package", className: "text-center" },
-        { header: "Promotion if any", key: "promotion", className: "text-center" },
+
     ]
 
     const roomData = invoiceData?.room_details
         ? [
             {
-                roomType: invoiceData.room_details.name || "No data",
-                guests: invoiceData.room_details.guests || "No data",
-                rooms: invoiceData.room_details.no_of_rooms?.toString() || "No data",
-                package: "None", // Not available in current data structure
-                promotion: "None", // Not available in current data structure
+                roomType: invoiceData.room_details.name || "",
+                guests: invoiceData.room_details.guests || "",
+                rooms: invoiceData.room_details.no_of_rooms?.toString() || "",
+
             },
         ]
         : []
@@ -112,29 +110,30 @@ const PaymentRedirectContent = () => {
                     <div className=" bg-white">
                         <div className=" w-full mx-auto py-3">
                             <ConfirmationHeader
-                                date={invoiceData?.booking_date ? `${invoiceData.booking_date}, 12:07` : "No data"}
+                                date={invoiceData?.booking_date ? `${invoiceData.booking_date}, 12:07` : ""}
                                 poweredBy="eZen Absolute - Powered By YCS"
-                                bookingReference={invoiceData?.booking_no || "No data"}
-                                hotelName={invoiceData?.property_name || "No data"}
-                                hotelAddress={invoiceData?.property_address || "No data"}
-                                hotelContact={invoiceData?.property_phone ? `Phone : ${invoiceData.property_phone}` : "No data"}
+                                bookingReference={invoiceData?.booking_no || ""}
+                                hotelName={invoiceData?.property_name || ""}
+                                hotelAddress={invoiceData?.property_address || ""}
+                                hotelContact={invoiceData?.property_phone ? `Phone : ${invoiceData.property_phone}` : ""}
+                                hotelEmail={invoiceData?.property_email ? `Email : ${invoiceData.property_email}` : ""}
                             />
 
                             <BookingDetails
-                                guestName={invoiceData?.customer_name || "No data"}
+                                guestName={invoiceData?.customer_name || ""}
                                 message={`Thank you for choosing ${invoiceData?.property_name || "us"} for your stay. We are pleased to inform you that your reservation request is CONFIRMED and your reservation details are as follows.`}
-                                bookingDate={invoiceData?.booking_date || "No data"}
-                                checkInDate={invoiceData?.checkin_date || "No data"}
-                                checkOutDate={invoiceData?.checkout_date || "No data"}
+                                bookingDate={invoiceData?.booking_date || ""}
+                                checkInDate={invoiceData?.checkin_date || ""}
+                                checkOutDate={invoiceData?.checkout_date || ""}
                                 nights={invoiceData?.nights || 0}
-                                arrivalTime={invoiceData?.arrival_time || "No data"}
+                                arrivalTime={invoiceData?.arrival_time || ""}
                                 specialRequest={invoiceData?.special_request || ""}
                             />
 
                             <GuestDetails
-                                name={invoiceData?.customer_name || "No data"}
-                                email={invoiceData?.customer_email || "No data"}
-                                phone={invoiceData?.customer_phone || "No data"}
+                                name={invoiceData?.customer_name || ""}
+                                email={invoiceData?.customer_email || ""}
+                                phone={invoiceData?.customer_phone || ""}
                             />
 
                             <DataTable title="Rooms Details" columns={roomColumns} data={roomData} />

@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { addDays, addMonths, endOfMonth, format, startOfMonth } from "date-fns";
+import { addDays, addMonths, endOfMonth, format, startOfMonth, isAfter, isBefore } from "date-fns";
 import { DateRange } from "react-day-picker";
 
 import { formatDateRange, stringToDate } from "@/lib/utils";
@@ -100,27 +100,66 @@ const DateFilter = ({ onDateChange, initialFrom, initialTo }: DateFilterProps) =
         return map;
     }, [data, isError]);
 
-    // disable past dates always
-    // plus any dates with zero inventory (from fetched window)
+    // Get all booked dates (dates with zero inventory) as Date objects
+    const bookedDates: Date[] = useMemo(() => {
+        const dates: Date[] = [];
+        for (const [key, info] of Object.entries(dayInfoMap)) {
+            if (info.hasZeroInventory) {
+                const [y, m, d] = key.split("-").map((n) => parseInt(n, 10));
+                if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+                    dates.push(new Date(y, m - 1, d));
+                }
+            }
+        }
+        return dates.sort((a, b) => a.getTime() - b.getTime());
+    }, [dayInfoMap]);
+
+    // Function to find the nearest booked date in a direction
+    const findNearestBookedDate = (fromDate: Date, direction: 'before' | 'after'): Date | null => {
+        const relevantDates = bookedDates.filter(bookedDate =>
+            direction === 'before' ? isBefore(bookedDate, fromDate) : isAfter(bookedDate, fromDate)
+        );
+
+        if (relevantDates.length === 0) return null;
+
+        return direction === 'before'
+            ? relevantDates[relevantDates.length - 1] // closest before (highest date that's still before)
+            : relevantDates[0]; // closest after (lowest date that's still after)
+    };
+
+    // Function to check if there are any booked dates between two dates (exclusive)
+    const hasBookedDatesBetween = (fromDate: Date, toDate: Date): boolean => {
+        const start = new Date(Math.min(fromDate.getTime(), toDate.getTime()));
+        const end = new Date(Math.max(fromDate.getTime(), toDate.getTime()));
+
+        return bookedDates.some(bookedDate => {
+            const bookedTime = bookedDate.getTime();
+            return bookedTime > start.getTime() && bookedTime < end.getTime();
+        });
+    };
+
+    // Calculate disabled dates based on current selection state
     const disabled = useMemo(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const list: any[] = [{ before: today }];
-        if (!isError && Object.keys(dayInfoMap).length > 0) {
-            const zeroDates: Date[] = [];
-            for (const [key, info] of Object.entries(dayInfoMap)) {
-                if (info.hasZeroInventory) {
-                    const [y, m, d] = key.split("-").map((n) => parseInt(n, 10));
-                    if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
-                        zeroDates.push(new Date(y, m - 1, d));
-                    }
-                }
-            }
-            if (zeroDates.length) {
-                list.push(...zeroDates);
-            }
+
+        // Always disable booked dates - they can never be selected
+        if (bookedDates.length > 0) {
+            list.push(...bookedDates);
         }
+
+        // When we have a FROM date selected and are choosing TO date
+        if (date?.from && !date?.to && !isSelectingFrom) {
+            // Disable any date that would create a range containing booked dates
+            const disabledToDatesMatcher = (day: Date) => {
+                return hasBookedDatesBetween(date.from!, day);
+            };
+
+            list.push(disabledToDatesMatcher);
+        }
+
         return list;
-    }, [dayInfoMap, isError]);
+    }, [date, isSelectingFrom, bookedDates]);
 
     const handleDateSelect = (
         range: DateRange | undefined,

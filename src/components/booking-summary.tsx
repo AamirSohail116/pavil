@@ -55,7 +55,7 @@ export function BookingSummary({
     const [promoCode, setPromoCode] = useState("");
     const [promoError, setPromoError] = useState("");
     const [discountData, setDiscountData] = useState<{ discount: number, type: string } | null>(null);
-    const [bookNowOpen, setBookNowOpen] = useState(false)
+    const [errorMesaage, setErrorMesaage] = useState("")
     const [priceBreakdownOpen, setPriceBreakdownOpen] = useState(false)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [selectedBookingItem, setSelectedBookingItem] = useState<any>(null);
@@ -128,6 +128,7 @@ export function BookingSummary({
     // Handle payment submission
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handlePayNow = (formData: any) => {
+        setErrorMesaage('')
 
         // Get the first booking item and room instance
         const bookingItem = bookingData[0]; // Assuming first booking item
@@ -167,8 +168,12 @@ export function BookingSummary({
         };
 
 
-        // Submit payment
-        createPaymentMutation.mutate(paymentData);
+        createPaymentMutation.mutate(paymentData, {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onError: (err: any) => {
+                setErrorMesaage(err?.response?.data?.message)
+            }
+        });
     };
 
 
@@ -363,6 +368,9 @@ export function BookingSummary({
                         >
                             <span>{createPaymentMutation.isPending ? 'Processing...' : 'Pay Now'}</span>
                         </Button>
+                        {errorMesaage && (
+                            <span className=" text-red-500 text-[14px] font-semibold">{errorMesaage}</span>
+                        )}
 
                     </div>
                 </CardContent>

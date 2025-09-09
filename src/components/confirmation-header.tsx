@@ -5,6 +5,7 @@ interface ConfirmationHeaderProps {
     hotelName: string
     hotelAddress: string
     hotelContact: string
+    hotelEmail: string
 }
 
 export function ConfirmationHeader({
@@ -14,13 +15,10 @@ export function ConfirmationHeader({
     hotelName,
     hotelAddress,
     hotelContact,
+    hotelEmail
 }: ConfirmationHeaderProps) {
     return (
         <div className="bg-[#dedede] p-6 rounded-lg mb-3">
-            <div className="flex justify-between items-start mb-4">
-                <span className="text-black text-sm">{date}</span>
-                <span className="text-black text-sm">{poweredBy}</span>
-            </div>
 
             <div className="border-2 border-black p-4 rounded">
                 <div className="flex justify-between items-start">
@@ -42,6 +40,7 @@ export function ConfirmationHeader({
                         <div className="text-sm mt-1">
                             <p>{hotelAddress}</p>
                             <p>{hotelContact}</p>
+                            <p>{hotelEmail}</p>
                         </div>
                     </div>
                 </div>

@@ -170,9 +170,8 @@ export function HotelBookingForm() {
         });
         setBookingList(updatedBookingData);
 
-        if (updatedBookingData.length === 0) {
-            router.push('/');
-        }
+
+
     }
 
 
@@ -278,10 +277,10 @@ export function HotelBookingForm() {
                                                                             const hour = i + 9; // start at 9 → end at 22
                                                                             const displayHour = hour % 12 === 0 ? 12 : hour % 12;
                                                                             const suffix = hour < 12 ? "am" : "pm";
-                                                                            const value = `${hour.toString().padStart(2, "0")}:00`;
+                                                                            const value = `${displayHour.toString().padStart(2, "0")}:00 ${suffix}`; // <-- save AM/PM too
                                                                             return (
                                                                                 <SelectItem key={hour} value={value}>
-                                                                                    {`${displayHour}:00 ${suffix}`}
+                                                                                    {value}
                                                                                 </SelectItem>
                                                                             );
                                                                         })}
@@ -292,6 +291,7 @@ export function HotelBookingForm() {
                                                         </FormItem>
                                                     )}
                                                 />
+
                                             </div>
 
                                         </div>

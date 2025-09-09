@@ -28,6 +28,7 @@ interface HotelBookingCardProps {
     showSummary?: boolean;
     check_in: string;
     check_out: string;
+    propertyId: string
 }
 
 interface BookingItem {
@@ -41,7 +42,7 @@ interface BookingItem {
     max_guests: number
 }
 
-export default function HotelBookingCard({ room, showSummary, check_in, check_out }: HotelBookingCardProps) {
+export default function HotelBookingCard({ room, showSummary, check_in, check_out, propertyId }: HotelBookingCardProps) {
     const [roomDetailsOpen, setRoomDetailsOpen] = useState(false);
     const [imageModalOpen, setImageModalOpen] = useState(false);
     const [cardOpen, setCardOpen] = useState(false);
@@ -145,7 +146,7 @@ export default function HotelBookingCard({ room, showSummary, check_in, check_ou
             max_guests: room.max_guests
         }]);
 
-        router.push("/reserve-booking");
+        router.push(`/reserve-booking?propertyId=${propertyId}`);
     };
 
     return (
