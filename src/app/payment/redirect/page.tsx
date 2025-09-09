@@ -1,80 +1,170 @@
-'use client'
+"use client"
 
-import React, { useEffect, useState, Suspense } from 'react';
-import { useCheckBookingStatus } from '@/API/useCheckBookingStatus';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState, Suspense } from "react"
+import { useCheckBookingStatus } from "@/API/useCheckBookingStatus"
+import { useRouter, useSearchParams } from "next/navigation"
+import { ConfirmationHeader } from "@/components/confirmation-header"
+import { BookingDetails } from "@/components/booking-details"
+import { GuestDetails } from "@/components/guest-details"
+import { DataTable } from "@/components/data-table"
+import { RatesSummary } from "@/components/rates-summary"
 
 const PaymentRedirectContent = () => {
-    const searchParams = useSearchParams();
-    const router = useRouter();
-    const orderid = searchParams.get('orderid');
-    const [paymentStatus, setPaymentStatus] = useState<'loading' | 'success' | 'failed'>('loading');
-    const [errorMessage, setErrorMessage] = useState('');
+    const searchParams = useSearchParams()
+    const router = useRouter()
+    const orderid = searchParams.get("orderid")
+    const [paymentStatus, setPaymentStatus] = useState<"loading" | "success" | "failed">("loading")
+    const [errorMessage, setErrorMessage] = useState("")
 
-    const { data, isLoading, isError, error, failureCount } = useCheckBookingStatus(orderid || '');
+    const { data, isLoading, isError, error, failureCount } = useCheckBookingStatus(orderid || "")
 
     useEffect(() => {
         if (data?.success) {
-            console.log("✅ Booking success:", data);
-            setPaymentStatus('success');
+            console.log("✅ Booking success:", data)
+            setPaymentStatus("success")
         }
-    }, [data]);
+    }, [data])
 
     useEffect(() => {
         if (isError && failureCount >= 4) {
-            setPaymentStatus('failed');
-            setErrorMessage(error?.message || 'Payment verification failed. Please contact support.');
+            setPaymentStatus("failed")
+            setErrorMessage(error?.message || "Payment verification failed. Please contact support.")
         }
-    }, [isError, failureCount, error]);
+    }, [isError, failureCount, error])
 
     const Loader = () => (
         <div className="flex flex-col items-center justify-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mb-4"></div>
             <p className="text-gray-600 text-lg">Verifying your payment...</p>
         </div>
-    );
+    )
 
-    if (paymentStatus === 'loading' || isLoading) {
+    if (paymentStatus === "loading" || isLoading) {
         return (
             <div className="min-h-[79vh] flex items-center justify-center bg-gray-50">
                 <div className="bg-white p-8 rounded-lg shadow-md">
                     <Loader />
                 </div>
             </div>
-        );
+        )
     }
+
+    const invoiceData = data?.invoice_data
+
+    if (paymentStatus === "success" && !invoiceData) {
+        return (
+            <div className="min-h-[79vh] flex items-center justify-center bg-gray-50">
+                <div className="text-center bg-white p-8 rounded-lg shadow-md w-full mx-4">
+                    <h2 className="text-2xl font-bold text-gray-600 mb-2">No Data Available</h2>
+                    <p className="text-gray-600 mb-4">Booking confirmation data is not available.</p>
+                </div>
+            </div>
+        )
+    }
+
+    const roomColumns = [
+        { header: "Room Type", key: "roomType" },
+        { header: "Guest(s)", key: "guests" },
+        { header: "No of rooms", key: "rooms", className: "text-center" },
+        { header: "Package if any", key: "package", className: "text-center" },
+        { header: "Promotion if any", key: "promotion", className: "text-center" },
+    ]
+
+    const roomData = invoiceData?.room_details
+        ? [
+            {
+                roomType: invoiceData.room_details.name || "No data",
+                guests: invoiceData.room_details.guests || "No data",
+                rooms: invoiceData.room_details.no_of_rooms?.toString() || "No data",
+                package: "None", // Not available in current data structure
+                promotion: "None", // Not available in current data structure
+            },
+        ]
+        : []
+
+    const inclusionColumns = [
+        { header: "Charge", key: "charge" },
+        { header: "Charge Rate", key: "rate", className: "text-right" },
+    ]
+
+    const inclusionData =
+        invoiceData?.discount && invoiceData.discount !== "RM 0.00"
+            ? [
+                {
+                    charge: "Discount Applied",
+                    rate: invoiceData.discount,
+                },
+            ]
+            : []
+
+    const ratesData = invoiceData
+        ? [
+            { label: "Sub Total", amount: invoiceData.sub_total?.replace("RM ", "") || "0.00" },
+            { label: "Discount", amount: invoiceData.discount?.replace("RM ", "") || "0.00" },
+            { label: "Total Paid", amount: invoiceData.total_paid?.replace("RM ", "") || "0.00", isTotal: true },
+        ]
+        : []
 
     return (
         <div className="min-h-[79vh] flex items-center justify-center bg-gray-50">
-            <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full mx-4">
-                {paymentStatus === 'success' ? (
-                    <div className="text-center">
-                        <h2 className="text-2xl font-bold text-green-600 mb-2">Payment Successful!</h2>
-                        <p className="text-gray-600">Your booking has been confirmed successfully.</p>
-                        <button
-                            onClick={() => router.push('/')}
-                            className="mt-6 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition duration-200"
-                        >
-                            Continue
-                        </button>
+            <div className="">
+                {paymentStatus === "success" ? (
+                    <div className=" bg-white">
+                        <div className=" w-full mx-auto py-3">
+                            <ConfirmationHeader
+                                date={invoiceData?.booking_date ? `${invoiceData.booking_date}, 12:07` : "No data"}
+                                poweredBy="eZen Absolute - Powered By YCS"
+                                bookingReference={invoiceData?.booking_no || "No data"}
+                                hotelName={invoiceData?.property_name || "No data"}
+                                hotelAddress={invoiceData?.property_address || "No data"}
+                                hotelContact={invoiceData?.property_phone ? `Phone : ${invoiceData.property_phone}` : "No data"}
+                            />
+
+                            <BookingDetails
+                                guestName={invoiceData?.customer_name || "No data"}
+                                message={`Thank you for choosing ${invoiceData?.property_name || "us"} for your stay. We are pleased to inform you that your reservation request is CONFIRMED and your reservation details are as follows.`}
+                                bookingDate={invoiceData?.booking_date || "No data"}
+                                checkInDate={invoiceData?.checkin_date || "No data"}
+                                checkOutDate={invoiceData?.checkout_date || "No data"}
+                                nights={invoiceData?.nights || 0}
+                                arrivalTime={invoiceData?.arrival_time || "No data"}
+                                specialRequest={invoiceData?.special_request || ""}
+                            />
+
+                            <GuestDetails
+                                name={invoiceData?.customer_name || "No data"}
+                                email={invoiceData?.customer_email || "No data"}
+                                phone={invoiceData?.customer_phone || "No data"}
+                            />
+
+                            <DataTable title="Rooms Details" columns={roomColumns} data={roomData} />
+
+                            {inclusionData.length > 0 && (
+                                <DataTable title="Inclusion Details" columns={inclusionColumns} data={inclusionData} />
+                            )}
+
+                            <RatesSummary title="Rates Details" items={ratesData} />
+                        </div>
                     </div>
                 ) : (
-                    <div className="text-center">
-                        <h2 className="text-2xl font-bold text-red-600 mb-2">Payment Failed</h2>
-                        <p className="text-gray-600 mb-4">{errorMessage}</p>
+                    <div>
+                        <div className="text-center bg-white p-8 rounded-lg shadow-md  w-full mx-4">
+                            <h2 className="text-2xl font-bold text-red-600 mb-2">Payment Failed</h2>
+                            <p className="text-gray-600 mb-4">{errorMessage}</p>
+                        </div>
                     </div>
                 )}
             </div>
         </div>
-    );
-};
+    )
+}
 
 const PaymentRedirectPage = () => {
     return (
         <Suspense fallback={<div className="p-10 text-center">Loading...</div>}>
             <PaymentRedirectContent />
         </Suspense>
-    );
-};
+    )
+}
 
-export default PaymentRedirectPage;
+export default PaymentRedirectPage
