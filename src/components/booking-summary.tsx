@@ -128,7 +128,6 @@ export function BookingSummary({
     // Handle payment submission
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handlePayNow = (formData: any) => {
-        console.log('Form Data:', formData);
 
         // Get the first booking item and room instance
         const bookingItem = bookingData[0]; // Assuming first booking item
@@ -167,10 +166,9 @@ export function BookingSummary({
             other_last_name: formData.contactLastName || ""
         };
 
-        console.log('Payment Data to be sent:', paymentData);
 
         // Submit payment
-        // createPaymentMutation.mutate(paymentData);
+        createPaymentMutation.mutate(paymentData);
     };
 
 
