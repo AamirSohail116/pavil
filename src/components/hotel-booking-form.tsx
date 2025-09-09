@@ -33,6 +33,7 @@ const formSchema = z.object({
     bookingForSomeoneElse: z.boolean(),
     contactFirstName: z.string().optional(),
     contactLastName: z.string().optional(),
+    countryCode: z.string().optional(),
     agreeToTerms: z.boolean().refine((val) => val === true, "You must agree to terms and conditions"),
     subscribeNewsletter: z.boolean().optional(),
 })
@@ -112,6 +113,7 @@ export function HotelBookingForm() {
             bookingForSomeoneElse: false,
             contactFirstName: "",
             contactLastName: "",
+            countryCode: "+62",
             agreeToTerms: false,
             subscribeNewsletter: false,
         },
@@ -263,20 +265,25 @@ export function HotelBookingForm() {
                                                     name="estimatedArrival"
                                                     render={({ field }) => (
                                                         <FormItem translate="no">
-                                                            <FormLabel className="text-[#99a1af] font-[500] text-[14px]">Estimated Arrival Time</FormLabel>
+                                                            <FormLabel className="text-[#99a1af] font-[500] text-[14px]">
+                                                                Estimated Arrival Time
+                                                            </FormLabel>
                                                             <FormControl>
                                                                 <Select onValueChange={field.onChange} value={field.value}>
                                                                     <SelectTrigger className="col-span-1 py-6 w-full">
                                                                         <SelectValue placeholder="09:00 am" />
                                                                     </SelectTrigger>
                                                                     <SelectContent>
-                                                                        {Array.from({ length: 24 }, (_, i) => {
-                                                                            const hour = i.toString().padStart(2, "0")
+                                                                        {Array.from({ length: 14 }, (_, i) => {
+                                                                            const hour = i + 9; // start at 9 → end at 22
+                                                                            const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+                                                                            const suffix = hour < 12 ? "am" : "pm";
+                                                                            const value = `${hour.toString().padStart(2, "0")}:00`;
                                                                             return (
-                                                                                <SelectItem key={i} value={`${hour}:00`}>
-                                                                                    {`${hour}:00 ${i < 12 ? "am" : "pm"}`}
+                                                                                <SelectItem key={hour} value={value}>
+                                                                                    {`${displayHour}:00 ${suffix}`}
                                                                                 </SelectItem>
-                                                                            )
+                                                                            );
                                                                         })}
                                                                     </SelectContent>
                                                                 </Select>
@@ -286,6 +293,7 @@ export function HotelBookingForm() {
                                                     )}
                                                 />
                                             </div>
+
                                         </div>
                                     </div>
                                 )}

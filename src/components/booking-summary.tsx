@@ -70,7 +70,7 @@ export function BookingSummary({
     const totalAmount = bookingData.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0
-    ) * rate;
+    );
 
 
     const discountedTotal = discountData
@@ -125,6 +125,8 @@ export function BookingSummary({
 
     // Handle payment submission
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // Handle payment submission
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handlePayNow = (formData: any) => {
         console.log('Form Data:', formData);
 
@@ -137,6 +139,12 @@ export function BookingSummary({
             return;
         }
 
+        // Example: selected country code from your form/store
+        const countryCode = formData.countryCode || "+62";
+
+        // Combine country code + contact number
+        const formattedContactNo = `${countryCode}${formData.contactNumber.replace(/^0+/, "")}`;
+
         // Map the form data to payment API format
         const paymentData = {
             // Required fields
@@ -147,7 +155,7 @@ export function BookingSummary({
             room_id: roomInstance.roomTypeId,
             first_name: roomInstance.firstName,
             last_name: roomInstance.lastName,
-            contact_no: formData.contactNumber,
+            contact_no: formattedContactNo,
             email: formData.email,
 
             // Optional fields
@@ -162,8 +170,9 @@ export function BookingSummary({
         console.log('Payment Data to be sent:', paymentData);
 
         // Submit payment
-        createPaymentMutation.mutate(paymentData);
+        // createPaymentMutation.mutate(paymentData);
     };
+
 
     return (
         <>

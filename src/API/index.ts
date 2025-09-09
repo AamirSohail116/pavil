@@ -28,3 +28,11 @@ export const createPayment = (data: any) =>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const applyCouponCode = (data: any) =>
     API.post(`/apply-coupon`, data);
+
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getRoomRates = (data: any) =>
+    API.post(`/get-room-rates`, data);
+
+export const checkBookingStatus = (orderid: string) =>
+    API.post(`/check-booking-status`, { orderid });

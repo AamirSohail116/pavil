@@ -1,24 +1,24 @@
-// components/contact-details.tsx
 "use client";
 
-import type { UseFormReturn } from "react-hook-form"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import type { UseFormReturn } from "react-hook-form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
 interface ContactDetailsProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    form: UseFormReturn<any>
+    form: UseFormReturn<any>;
 }
 
 export function ContactDetails({ form }: ContactDetailsProps) {
     const bookingForSomeoneElse = form.watch("bookingForSomeoneElse");
 
     return (
-        <Card className="mb-2" >
+        <Card className="mb-2">
             <CardHeader>
                 <CardTitle className="text-lg font-semibold leading-[28px]">Contact Details</CardTitle>
                 <div className="flex items-center space-x-2" translate="no">
@@ -89,17 +89,43 @@ export function ContactDetails({ form }: ContactDetailsProps) {
                             <span className="text-red-500">*</span>
                         </div>
                         <div className="flex space-x-2" translate="no">
-                            <Select defaultValue="+92">
-                                <SelectTrigger className="w-[100px] py-6">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="+92">🇵🇰 +92</SelectItem>
-                                    <SelectItem value="+1">🇺🇸 +1</SelectItem>
-                                    <SelectItem value="+44">🇬🇧 +44</SelectItem>
-                                    <SelectItem value="+60">🇲🇾 +60</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <FormField
+                                control={form.control}
+                                name="countryCode"
+                                render={({ field }) => (
+                                    <FormItem className="w-[100px]">
+                                        <FormControl>
+                                            <PhoneInput
+                                                country={"my"}
+                                                value={field.value}
+                                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                                onChange={(phone, country: any) => field.onChange(`+${country.dialCode}`)}
+                                                containerStyle={{ height: "50px" }}
+                                                inputStyle={{
+                                                    height: "50px",
+                                                    width: "100px",
+                                                    borderColor: "#e2e8f0",
+                                                    borderRadius: "0.375rem",
+                                                    paddingLeft: "40px",
+                                                }}
+                                                buttonStyle={{
+                                                    borderColor: "#e2e8f0",
+                                                    borderRadius: "0.375rem 0 0 0.375rem",
+                                                    backgroundColor: "#fff",
+                                                }}
+                                                dropdownStyle={{
+                                                    borderRadius: "0.375rem",
+                                                    maxHeight: "200px",
+                                                }}
+                                                enableSearch
+                                                disableDropdown={false}
+                                                countryCodeEditable={false}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                             <FormField
                                 control={form.control}
                                 name="contactNumber"
@@ -145,5 +171,5 @@ export function ContactDetails({ form }: ContactDetailsProps) {
                 </div>
             </CardContent>
         </Card>
-    )
+    );
 }

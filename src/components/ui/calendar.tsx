@@ -10,6 +10,8 @@ import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker"
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
 
+type RenderDayExtras = (date: Date) => React.ReactNode | null
+
 function Calendar({
   className,
   classNames,
@@ -18,19 +20,25 @@ function Calendar({
   buttonVariant = "ghost",
   formatters,
   components,
+  renderDayExtras,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
+  renderDayExtras?: RenderDayExtras
 }) {
   const defaultClassNames = getDefaultClassNames()
+
+  const ExtrasAwareDayButton = React.useCallback((p: React.ComponentProps<typeof DayButton>) => {
+    return <CalendarDayButton {...p} renderDayExtras={renderDayExtras} />
+  }, [renderDayExtras])
 
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        "bg-background group/calendar p-2 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
-        String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
-        String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
+        "bg-background group/calendar p-2 [--cell-size:40px] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
+        String.raw`rtl:**:[.rdp-button_next>svg]:rotate-180`,
+        String.raw`rtl:**:[.rdp-button_previous>svg]:rotate-180`,
         className
       )}
       captionLayout={captionLayout}
@@ -47,7 +55,7 @@ function Calendar({
         ),
         month: cn("flex flex-col w-full gap-4", defaultClassNames.month),
         nav: cn(
-          "flex items-center  gap-1 w-full absolute top-0 inset-x-0 justify-between",
+          "flex items-center gap-1 w-full absolute top-0 inset-x-0 justify-between",
           defaultClassNames.nav
         ),
         button_previous: cn(
@@ -61,7 +69,7 @@ function Calendar({
           defaultClassNames.button_next
         ),
         month_caption: cn(
-          "flex items-center justify-center bg-[#f3a32d] text-white   h-(--cell-size) w-full px-(--cell-size)",
+          "flex items-center justify-center bg-[#f3a32d] text-white h-(--cell-size) w-full px-(--cell-size)",
           defaultClassNames.month_caption
         ),
         dropdowns: cn(
@@ -69,7 +77,7 @@ function Calendar({
           defaultClassNames.dropdowns
         ),
         dropdown_root: cn(
-          "relative has-focus:border-ring  border border-input shadow-xs has-focus:ring-ring/50 has-focus:ring-[3px] rounded-md",
+          "relative has-focus:border-ring border border-input shadow-xs has-focus:ring-ring/50 has-focus:ring-[3px] rounded-md",
           defaultClassNames.dropdown_root
         ),
         dropdown: cn(
@@ -80,7 +88,7 @@ function Calendar({
           "select-none font-medium ",
           captionLayout === "label"
             ? "text-sm"
-            : "rounded-md pl-2 pr-1 flex items-center gap-1 text-sm h-8  [&>svg]:size-3.5",
+            : "rounded-md pl-2 pr-1 flex items-center gap-1 text-sm h-8 [&>svg]:size-3.5",
           defaultClassNames.caption_label
         ),
         table: "w-full border-collapse",
@@ -95,11 +103,11 @@ function Calendar({
           defaultClassNames.week_number_header
         ),
         week_number: cn(
-          "text-[0.8rem]  select-none text-[#3d91ff]",
+          "text-[0.8rem] select-none text-[#3d91ff]",
           defaultClassNames.week_number
         ),
         day: cn(
-          "relative w-full border border-gray-200  h-full p-0 text-center [&:first-child[data-selected=true]_button]:rounded-l-md [&:last-child[data-selected=true]_button]:rounded-r-md group/day aspect-square select-none",
+          "relative w-full border border-gray-200 h-full p-0 text-center [&:first-child[data-selected=true]_button]:rounded-l-md [&:last-child[data-selected=true]_button]:rounded-r-md group/day aspect-square select-none",
           defaultClassNames.day
         ),
         range_start: cn(
@@ -163,7 +171,7 @@ function Calendar({
             <ChevronDownIcon className={cn("size-4", className)} {...props} />
           )
         },
-        DayButton: CalendarDayButton,
+        DayButton: ExtrasAwareDayButton,
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>
@@ -184,8 +192,11 @@ function CalendarDayButton({
   className,
   day,
   modifiers,
+  renderDayExtras,
   ...props
-}: React.ComponentProps<typeof DayButton>) {
+}: React.ComponentProps<typeof DayButton> & {
+  renderDayExtras?: RenderDayExtras
+}) {
   const defaultClassNames = getDefaultClassNames()
 
   const ref = React.useRef<HTMLButtonElement>(null)
@@ -209,12 +220,17 @@ function CalendarDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        "data-[selected-single=true]:bg-primary cursor-pointer data-[selected-single=true]:text-primary-foreground data-[range-middle=true]:bg-[#c8edfc] data-[range-middle=true]:text-accent-foreground data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md [&>span]:text-xs [&>span]:opacity-70",
+        "relative data-[selected-single=true]:bg-cyan-200 cursor-pointer data-[selected-single=true]:text-primary-foreground data-[range-middle=true]:bg-cyan-100 data-[range-middle=true]:text-accent-foreground data-[range-start=true]:bg-cyan-200 data-[range-start=true]:text-primary-foreground data-[range-end=true]:bg-cyan-200 data-[range-end=true]:text-primary-foreground group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground flex aspect-square size-auto w-full min-w-[40px] h-[40px] flex-col gap-0 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md [&>span]:text-xs p-2",
         defaultClassNames.day,
         className
       )}
       {...props}
-    />
+    >
+      <span className="flex items-center justify-center text-sm">{day.date.getDate()}</span>
+      {typeof renderDayExtras === "function" ? (
+        <>{renderDayExtras(day.date)}</>
+      ) : null}
+    </Button>
   )
 }
 

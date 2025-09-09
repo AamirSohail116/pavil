@@ -1,8 +1,10 @@
+
 "use client";
-import { UseFormReturn } from "react-hook-form"
-import { FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
+import { useEffect } from "react";
+import { UseFormReturn } from "react-hook-form";
+import { FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Label } from "./ui/label";
 import { useGuestStore } from "@/store/useGuestStore";
@@ -19,47 +21,63 @@ interface GuestDetailsSectionProps {
     onUseDetailsForAllRooms: (checked: boolean, roomIndex: number) => void;
     useDetailsForAllRooms: boolean;
 }
+
 export function GuestDetailsSection({
     form,
     roomIndex,
     maxGuests,
     showUseForAllRooms,
     onUseDetailsForAllRooms,
-    useDetailsForAllRooms
+    useDetailsForAllRooms,
 }: GuestDetailsSectionProps) {
     const { max_guests } = useGuestStore();
 
+    // Set default value of guestCount to max_guests when component mounts
+    useEffect(() => {
+        if (max_guests) {
+            form.setValue(`rooms.${roomIndex}.guestCount`, max_guests.toString());
+        }
+    }, [form, roomIndex, max_guests]);
+
     return (
         <div className="">
-            {/* <h3 className="text-lg font-[500]">{`Guest Details for Room ${roomNumber} (${roomType})`}hiii</h3> */}
             <div className="space-y-4">
-                <div className=" flex flex-col gap-1 sm:gap-0 sm:flex-row">
+                <div className="flex flex-col gap-1 sm:gap-0 sm:flex-row">
                     <div>
                         <div className="flex items-center space-x-2 text-sm text-red-500">
-                            <span className=" text-black  text-[14px] font-[600]">Guest Details</span>
+                            <span className="text-black text-[14px] font-[600]">Guest Details</span>
                             <span className="text-red-500">*</span>
                         </div>
-                        <div className=" flex flex-col sm:flex-row gap-2 xl:gap-4">
+                        <div className="flex flex-col sm:flex-row gap-2 xl:gap-4">
                             <FormField
                                 control={form.control}
                                 name={`rooms.${roomIndex}.firstName`}
                                 render={({ field }) => (
                                     <FormItem translate="no">
                                         <FormControl>
-                                            <Input className=" h-[50px] w-full sm:w-[230px] xl:w-[250px]" placeholder="First Name" value={field.value} onChange={field.onChange} />
+                                            <Input
+                                                className="h-[50px] w-full sm:w-[230px] xl:w-[250px]"
+                                                placeholder="First Name"
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
-
                             <FormField
                                 control={form.control}
                                 name={`rooms.${roomIndex}.lastName`}
                                 render={({ field }) => (
                                     <FormItem translate="no">
                                         <FormControl>
-                                            <Input className=" h-[50px] w-full sm:w-[230px] xl:w-[250px]" placeholder="Last Name" value={field.value} onChange={field.onChange} />
+                                            <Input
+                                                className="h-[50px] w-full sm:w-[230px] xl:w-[250px]"
+                                                placeholder="Last Name"
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -67,8 +85,7 @@ export function GuestDetailsSection({
                             />
                         </div>
                     </div>
-
-                    <div className=" ml-2 xl:ml-4">
+                    <div className="ml-2 xl:ml-4">
                         <Label className="text-sm text-gray-600">Guest</Label>
                         <FormField
                             control={form.control}
@@ -77,11 +94,11 @@ export function GuestDetailsSection({
                                 <FormItem translate="no">
                                     <Select
                                         onValueChange={field.onChange}
-                                        value={field.value || max_guests.toString()} // default fallback
+                                        value={field.value} // Use field.value directly
                                     >
                                         <FormControl>
-                                            <SelectTrigger className=" w-[200px] sm:w-[100px] py-6">
-                                                <SelectValue />
+                                            <SelectTrigger className="w-[200px] sm:w-[100px] py-6">
+                                                <SelectValue placeholder="Select guests" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -98,14 +115,15 @@ export function GuestDetailsSection({
                         />
                     </div>
                 </div>
-
                 {/* {showUseForAllRooms && (
                     <div className="flex items-center space-x-2">
                         <Checkbox
                             translate="no"
                             id="useForAllRooms"
                             checked={useDetailsForAllRooms}
-                            onCheckedChange={(checked: boolean) => onUseDetailsForAllRooms?.(checked as boolean, roomIndex)}
+                            onCheckedChange={(checked: boolean) =>
+                                onUseDetailsForAllRooms?.(checked as boolean, roomIndex)
+                            }
                         />
                         <Label htmlFor="useForAllRooms" className="text-sm text-gray-600">
                             Use these details for all rooms
@@ -114,5 +132,5 @@ export function GuestDetailsSection({
                 )} */}
             </div>
         </div>
-    )
+    );
 }

@@ -13,6 +13,8 @@ import { Loader } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { usePropertyStore } from "@/hooks/usePropertyInfo"
 import { useGuestStore } from "@/store/useGuestStore"
+import { useRoomIdStore } from "@/hooks/useRoomId"
+import { getDefaultDateRange, useGetRoomRates } from "@/API/useGetRoomRates"
 
 // Create a separate component for the main content
 function HomeContent() {
@@ -30,6 +32,10 @@ function HomeContent() {
 
   // Use the property store
   const { updateProperty } = usePropertyStore()
+  const { setRoomId } = useRoomIdStore();
+
+
+
 
   const combinedFilters = { ...filters, property_id: (propertyIdFromUrl) }
 
@@ -54,13 +60,20 @@ function HomeContent() {
   // Update property data in store when propertyData changes
   useEffect(() => {
     if (data?.property && data.property.id) {
+      // update property store
       updateProperty({
         id: data.property.id,
-        name: data.property.name || '',
-        address: data.property.address || ''
-      })
+        name: data.property.name || "",
+        address: data.property.address || ""
+      });
+
+      // only update propertyId if rooms exist
+      if (data?.rooms && data.rooms.length > 0) {
+        setRoomId(data.rooms[0].roomId);
+      }
     }
-  }, [data?.property, updateProperty])
+  }, [data?.property, data?.rooms, updateProperty, setRoomId]);
+
 
   useEffect(() => {
     if (bookingData.length > 0) {
