@@ -253,7 +253,7 @@ export default function HotelBookingCard({ room, showSummary, check_in, check_ou
                                         {discountPercent}% Off
                                     </div>
                                     <button className="bg-red-600 hover:bg-red-700 px-2 py-1 text-white">
-                                        Save {currencyCode} {(basePrice - discountPrice).toFixed(2)}
+                                        Save {currencyCode} {(basePrice - discountPrice).toFixed(0)}
                                     </button>
                                 </div> */}
                             </div>
@@ -288,10 +288,10 @@ export default function HotelBookingCard({ room, showSummary, check_in, check_ou
                                     <HoverCardTrigger translate="no" onClick={() => setCardOpen(true)} asChild>
                                         <div className="text-right cursor-pointer">
                                             {/* <div className="text-[12px] font-normal text-black line-through">
-                                                {currencyCode} {(basePrice * rate * roomCount).toFixed(1)}
+                                                {currencyCode} {(basePrice * rate * roomCount).toFixed(0)}
                                             </div> */}
                                             <div className="text-[16px] font-[500] text-black">
-                                                {currencyCode} {(totalPrice * rate * roomCount).toFixed(1)} ▶
+                                                {currencyCode} {(totalPrice * rate * roomCount).toFixed(0)} ▶
                                             </div>
                                             <div className="text-[10px] text-black font-normal">
                                                 Tax Inclusive
@@ -311,13 +311,13 @@ export default function HotelBookingCard({ room, showSummary, check_in, check_ou
                                                         <span className="text-[12px] font-[400] text-[#212529]">{(dateKey)}</span>
                                                         <div className="text-right">
                                                             {/* <div translate="no" className="text-[12px] line-through text-gray-500">
-                                                                {currencyCode} {(price * 1.1 * rate * roomCount).toFixed(1)}
+                                                                {currencyCode} {(price * 1.1 * rate * roomCount).toFixed(0)}
                                                             </div> */}
                                                             <div translate="no" className="text-[12px] font-medium">
-                                                                {currencyCode} {(price * rate * roomCount).toFixed(1)}
+                                                                {currencyCode} {(price * rate * roomCount).toFixed(0)}
                                                             </div>
                                                             {/* <div className="text-xs text-red-600">
-                                                                <span translate="no">Save</span> {currencyCode} {(price * 0.1 * rate * roomCount).toFixed(1)}
+                                                                <span translate="no">Save</span> {currencyCode} {(price * 0.1 * rate * roomCount).toFixed(0)}
                                                             </div> */}
                                                         </div>
                                                     </div>
@@ -325,7 +325,7 @@ export default function HotelBookingCard({ room, showSummary, check_in, check_ou
                                                 <hr className="border-gray-200" />
                                                 <div className="flex justify-between items-center font-[500]">
                                                     <span>Total</span>
-                                                    <span translate="no">{currencyCode} {(totalPrice * rate * roomCount).toFixed(1)}</span>
+                                                    <span translate="no">{currencyCode} {(totalPrice * rate * roomCount).toFixed(0)}</span>
                                                 </div>
                                             </div>
                                             <div className="p-4 pt-0 text-right">

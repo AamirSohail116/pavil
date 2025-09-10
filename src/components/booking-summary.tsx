@@ -235,7 +235,7 @@ export function BookingSummary({
                                             </div>
                                             <div className="flex items-center">
                                                 <span className="font-medium">
-                                                    {currencyCode} {(bookingItem.price * rate).toFixed(1)}
+                                                    {currencyCode} {(bookingItem.price * rate).toFixed(0)}
                                                 </span>
                                             </div>
                                         </div>
@@ -247,7 +247,7 @@ export function BookingSummary({
                                             onClick={() => handlePriceBreakdownClick(bookingItem, room)}
                                             className="text-[#008ace] cursor-pointer underline">Price breakdown</button>)
                                     </span>
-                                    <span className="font-medium"> {currencyCode} {(bookingItem.price * rate).toFixed(1)}</span>
+                                    <span className="font-medium"> {currencyCode} {(bookingItem.price * rate).toFixed(0)}</span>
                                 </div>
                             </div>
                         );
@@ -305,14 +305,14 @@ export function BookingSummary({
                         </div>
                         <div className="flex justify-between font-semibold text-lg">
                             <span className="text-[14px] font-bold leading-[21px]">Total</span>
-                            <span className={`text-[14px] font-bold leading-[21px] ${discountedTotal ? "line-through text-gray-500" : ""}`}>MYR {totalAmount.toFixed(2)}</span>
+                            <span className={`text-[14px] font-bold leading-[21px] ${discountedTotal ? "line-through text-gray-500" : ""}`}>MYR {totalAmount.toFixed(0)}</span>
 
                         </div>
                         {
                             discountedTotal && (
                                 <div className="flex justify-between font-semibold text-lg">
                                     <span className="text-[14px] font-bold leading-[21px]">Discounted Total</span>
-                                    <span className="text-[14px] font-bold leading-[21px]">MYR {discountedTotal.toFixed(2)}</span>
+                                    <span className="text-[14px] font-bold leading-[21px]">MYR {discountedTotal.toFixed(0)}</span>
                                 </div>
                             )
                         }

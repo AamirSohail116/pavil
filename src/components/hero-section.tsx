@@ -1,12 +1,12 @@
 
 
-export function HeroSection() {
+export function HeroSection({ bannerImg }: { bannerImg?: string }) {
     return (
         <div>
             <div className="relative h-[120px] sm:h-[160px] md:h-[255px] w-full overflow-hidden ">
                 {/* Background Image */}
                 <img
-                    src="/hero-bg.jpg"
+                    src={bannerImg || '/default-banner.jpg'}
                     alt="Hotel room with teal accents and modern furnishing"
                     className="w-full h-full object-cover"
                 />

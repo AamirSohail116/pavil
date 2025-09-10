@@ -133,19 +133,19 @@ export function HomeBookingSummary({ roomTypes, setShowSummary }: HomeBookingSum
                                                 <BsPersonStanding className="size-5 text-[#212529]" />
                                             </div>
                                             <div className="flex items-center">
-                                                <span className="font-medium">{currencyCode} {(roomInstance.price * rate).toFixed(1)}</span>
+                                                <span className="font-medium">{currencyCode} {(roomInstance.price * rate).toFixed(0)}</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="flex justify-between text-sm mt-4 border-b pb-3">
                                     <span className="text-[12px] font-bold">Sub Total</span>
-                                    <span className="font-bold text-[12px]">{currencyCode} {(roomInstance.price * rate).toFixed(1)}</span>
+                                    <span className="font-bold text-[12px]">{currencyCode} {(roomInstance.price * rate).toFixed(0)}</span>
                                 </div>
 
                                 <div className="flex justify-between text-sm mt-4 border-b pb-3">
                                     <span className="text-[12px] font-bold">Total</span>
-                                    <span className="font-bold text-[12px]">{currencyCode} {totalAmount.toFixed(1)}</span>
+                                    <span className="font-bold text-[12px]">{currencyCode} {totalAmount.toFixed(0)}</span>
                                 </div>
                             </div>
                         )

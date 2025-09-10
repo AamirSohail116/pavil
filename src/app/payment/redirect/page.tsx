@@ -147,7 +147,7 @@ const PaymentRedirectContent = () => {
                     </div>
                 ) : (
                     <div>
-                        <div className="text-center bg-white p-8 rounded-lg shadow-md  w-full mx-4">
+                        <div className="text-center bg-white p-8 rounded-lg shadow-md  w-full ">
                             <h2 className="text-2xl font-bold text-red-600 mb-2">Payment Failed</h2>
                             <p className="text-gray-600 mb-4">{errorMessage}</p>
                         </div>

@@ -228,7 +228,7 @@ const DateFilter = ({ onDateChange, initialFrom, initialTo }: DateFilterProps) =
                         </span>
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-full p-0" align="start">
                     <Calendar
                         numberOfMonths={monthsToShow}
                         defaultMonth={date?.from || today}
@@ -241,6 +241,7 @@ const DateFilter = ({ onDateChange, initialFrom, initialTo }: DateFilterProps) =
                         selected={date}
                         onSelect={handleDateSelect}
                         disabled={disabled}
+                        className=" w-full"
                         renderDayExtras={(d) => {
                             if (isError) return null;
                             const key = format(d, "yyyy-MM-dd");

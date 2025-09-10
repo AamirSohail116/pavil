@@ -152,7 +152,7 @@ function HomeContent() {
 
   return (
     <div className="">
-      <HeroSection />
+      <HeroSection bannerImg={propertyData?.banner_img} />
       <BookingFilters
         onSearch={handleSearch}
         filters={combinedFilters}

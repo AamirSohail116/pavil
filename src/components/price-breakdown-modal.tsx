@@ -81,7 +81,7 @@ export function PriceBreakdownModal({
                             {priceEntries.map(([dateKey, price], index) => (
                                 <div key={index} className="flex justify-between items-center border-b p-3 ">
                                     <div className="text-sm text-gray-600">{(dateKey)}</div>
-                                    <div className="text-sm font-medium">{currencyCode} {(price * rate).toFixed(1)}</div>
+                                    <div className="text-sm font-medium">{currencyCode} {(price * rate).toFixed(0)}</div>
                                 </div>
                             ))}
                         </div>
@@ -100,7 +100,7 @@ export function PriceBreakdownModal({
                             <div className="text-sm text-gray-600">
                                 Total Rate for {numberOfNights} Night{numberOfNights !== 1 ? 's' : ''} {max_guests || 1} Guests
                             </div>
-                            <div className="text-sm font-medium">{currencyCode} {(totalPrice * rate).toFixed(1)}</div>
+                            <div className="text-sm font-medium">{currencyCode} {(totalPrice * rate).toFixed(0)}</div>
                         </div>
                     </div>
 
@@ -108,7 +108,7 @@ export function PriceBreakdownModal({
                     <div className="border p-3">
                         <div className="flex justify-between items-center">
                             <div className="text-base font-semibold">Total</div>
-                            <div className="text-base font-semibold">{currencyCode} {(totalPrice * rate).toFixed(1)}</div>
+                            <div className="text-base font-semibold">{currencyCode} {(totalPrice * rate).toFixed(0)}</div>
                         </div>
                     </div>
                 </div>

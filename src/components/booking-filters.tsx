@@ -111,7 +111,7 @@ export function BookingFilters({ filters, currencies, onFilterChange, onSearch }
                 </div>
 
                 {/* Guests Input */}
-                <div className="w-full md:w-[200px]">
+                <div className="w-full md:w-[185px]">
                     <Label className="text-[#008ace] font-[300] text-[10px] leading-[18px] uppercase mb-[2px]">
                         GUESTS
                     </Label>
