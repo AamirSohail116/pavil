@@ -72,7 +72,6 @@ export function PriceBreakdownModal({
                     {/* Room Type */}
                     <div className="text-[14px] font-[400] leading-[26px] text-[#212529]">
                         <span className="font-medium">{roomType}</span>
-                        <span className=" ml-1">( BOOK NOW )</span>
                     </div>
 
                     <div className="border space-y-4 rounded-md">
