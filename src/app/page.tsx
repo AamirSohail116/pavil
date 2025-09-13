@@ -60,6 +60,8 @@ function HomeContent() {
     refetch()
   }
 
+  console.log("first", data)
+
   useEffect(() => {
     if (!data) {
       refetch()
@@ -74,23 +76,7 @@ function HomeContent() {
     }
   }, [filters.search, filters.guests, setMaxGuests, refetch, setFilters])
 
-  useEffect(() => {
-    if (!isLoading && !isFetching && data && data.rooms.length === 0 && adjustCount < MAX_ADJUSTS) {
-      setIsAdjusting(true)
-      setAdjustCount(prev => prev + 1)
-      const currentFrom = new Date(filters.check_in)
-      const newFrom = addDays(currentFrom, 1)
-      const newTo = addDays(newFrom, 1)
-      setFilters(prev => ({
-        ...prev,
-        check_in: formatDate(newFrom),
-        check_out: formatDate(newTo),
-        search: "yes"
-      }))
-    } else if (data && data.rooms.length > 0) {
-      setIsAdjusting(false)
-    }
-  }, [isLoading, isFetching, data, adjustCount, filters.check_in, setFilters])
+
 
   useEffect(() => {
     if (data?.property?.id) {
@@ -105,22 +91,14 @@ function HomeContent() {
     }
   }, [data?.property, data?.rooms, updateProperty, setRoomId])
 
-  useEffect(() => {
-    if (bookingData.length > 0) {
-      const timer = setTimeout(() => {
-        setShowSummary(true)
-      }, 500)
-      return () => clearTimeout(timer)
-    } else {
-      setShowSummary(false)
-    }
-  }, [bookingData])
+
+
 
   if (!propertyIdFromUrl) {
     return null // Prevent rendering until redirect
   }
 
-  if (isLoading || isFetching || isAdjusting) {
+  if (isLoading || isFetching) {
     return (
       <div className="h-[80vh] flex items-center justify-center">
         <Loader className="animate-spin h-10 w-10 text-gray-500" />
@@ -128,13 +106,11 @@ function HomeContent() {
     )
   }
 
-  if (isError || (adjustCount >= MAX_ADJUSTS && data?.rooms.length === 0)) {
+  if (isError) {
     return (
       <div className="h-[100vh] flex flex-col items-center justify-center text-center space-y-4">
         <p className="text-red-500 font-medium">
-          {error instanceof Error ? error.message : adjustCount >= MAX_ADJUSTS
-            ? "No availability found in the next 30 days. Try selecting later dates manually."
-            : "Something went wrong while fetching rooms."}
+          {error instanceof Error ? error.message : "Something went wrong while fetching rooms."}
         </p>
         <button
           onClick={() => refetch()}
@@ -143,7 +119,7 @@ function HomeContent() {
           Try Again
         </button>
       </div>
-    )
+    );
   }
 
   const rooms = data?.rooms || []
